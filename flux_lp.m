@@ -1,4 +1,4 @@
-%% flux_lp.m  6/12/2014  Parker MacCready
+%% flux_lp.m  5/8/2015  Parker MacCready
 %
 % does low-pass filtering of the vertically-integrated flux terms
 % calculated by flux.m (via flux_driver.m)
@@ -8,8 +8,9 @@ addpath('./Zfun');
 odir_top = [Tdir.output,'energy_out/'];
 
 % set indices of times to average around
-nn_center_vec = 1848;
-
+%nn_center_vec = 1848;
+% for Cdia2005 we have 1:8760
+nn_center_vec = 36:24:8760-36
 % set size of averaging window
 win_len = 71;
 

@@ -4,7 +4,7 @@
 
 clear
 addpath('../alpha/'); Tdir = toolstart;
-pth = '/Users/PM3/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
+pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
 
 if 1
     [fn,pth]=uigetfile(pth,'Select .mat file(s) to plot', ...

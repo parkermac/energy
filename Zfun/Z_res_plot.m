@@ -5,6 +5,8 @@ function Z_res_plot(G,p2,k2,e2,sw,do_lp,Tdir,info)
 % Z_fig(14)
 % set(gcf,'position',[250 10 2000 1300]);
 
+p2.ape(p2.ape<0) = 1e-10;
+
 subplot(121)
 Z_pcolorcen(G.lon_rho,G.lat_rho,log10(p2.ape));
 caxis([1 6]);

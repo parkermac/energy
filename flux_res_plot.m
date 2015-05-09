@@ -5,17 +5,25 @@
 clear
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
-pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_raw/';
-do_flux = 1;
+pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/';
 
-if 0
+
+do_flux = 0;
+
+if 1
     [fn,pth]=uigetfile(pth,'Select .mat file(s) to plot', ...
         'multiselect','on');
 else % faster, for plot development
-    fn = 'flux_01848.mat';
+    fn = 'flux_00252.mat';
     pth = ['/Users/PM5/Documents/tools_output/energy_out/', ...
-        'D2005/flux_lp71/'];
+        'Cdia2005/flux_lp71/'];
+end
+
+lp_test = strfind(pth,'lp71');
+if ~isempty(lp_test)
     do_lp = 1;
+else
+    do_lp = 0;
 end
 
 load([pth,'G.mat']); % has island
@@ -26,8 +34,8 @@ if iscell(fn); make_movie = 1; end
 if make_movie; ntt = size(fn,2); else; ntt = 1; end;
 
 figure
-Z_fig(18);
-set(gcf,'position',[10 10 700 500])
+Z_fig(14);
+set(gcf,'position',[10 10 1350 900])
 set(gcf,'PaperPositionMode','auto');
 
 for tt = 1:ntt % MOVIE loop start (or just make single plot)
