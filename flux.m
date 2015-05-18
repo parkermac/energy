@@ -75,6 +75,7 @@ rho_avg = den1 + offset;
 % in situ values, whereas the density we use is referenced to zero
 % pressure.  The difference of these terms for s=31, theta=8 between 0 and
 % 1000 m is 1.2% for beta, but 14% for alpha. 5/4/2015
+% 5/14/2015 Thought: maybe we should use alpha and beta for 0*z_avg?
 rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
 [D_avg] = Z_flat(eta_avg,rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;

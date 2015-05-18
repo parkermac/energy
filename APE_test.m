@@ -30,8 +30,6 @@ g2 = g/2;
 rho0 = 1023.7; % set in the ROMS parameters
 offset = 1000; % to add to the density anomaly
 
-do_scotti = 1;
-
 ns = num2str(nn); ns = ['0000',ns]; ns = ns(end-3:end);
 f_his1 = [dir0.his,'ocean_his_',ns,'.nc'];
 f_avg = [dir0.avg,'ocean_avg_',ns,'.nc'];
@@ -55,92 +53,70 @@ temp = nc_varget(f_avg,'temp');
 [den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z_avg);
 rho_avg = den1 + offset;
 rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
-[D_avg] = Z_flat(eta_avg,rho_avg,z_avg,z_w_avg,H,do_scotti);
+[D_avg] = Z_flat(eta_avg,rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;
 rr_avg = D_avg.R - D_avg.Rf;
 
+% divide the APE into up and down parts
+zz_up = zz_avg;
+zz_down = zz_avg;
+zz_up(zz_avg < 0) = 0;
+zz_down(zz_avg >= 0) = 0;
+
 % create the approximate APE
-ape_avg = squeeze(sum(g2*zz_avg.*DZ_avg.*rr_avg)); % [J m-2]
+%apea_approx = squeeze(sum(g2*zz_avg.*DZ_avg.*rr_avg)); % [J m-2]
 
 % create exact APE (neglecting compressibility)
 F_avg = g*(D_avg.intRf - D_avg.intRfzf);
 apev = g*zz_avg.*rho_avg - F_avg;
-ape_alt = squeeze(sum(apev.*DZ_avg)); % [J m-2]
-ape_alt(ape_alt<=0) = 1e-10; % there is one negative point, with value -2.8e-7
+apea = squeeze(sum(apev.*DZ_avg)); % [J m-2]
 
-%% testing
-% first get some start and end values
-%
-eta1 = nc_varget(f_his1,'zeta');
-[z1,z_w] = Z_s2z(G.h,eta1,S);
-DZ1 = diff(z_w);
-salt = nc_varget(f_his1,'salt');
-temp = nc_varget(f_his1,'temp');
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z1);
-rho1 = den1 + offset;
-clear salt temp
-[D1] = Z_flat(eta1,rho1,z1,z_w,H,do_scotti);
-zz1 = D1.Z - D1.Zf;
-rr1 = D1.R - D1.Rf;
-%
-eta2 = nc_varget(f_his2,'zeta');
-[z2,z_w] = Z_s2z(G.h,eta2,S);
-DZ2 = diff(z_w);
-salt = nc_varget(f_his2,'salt');
-temp = nc_varget(f_his2,'temp');
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z2);
-rho2 = den1 + offset;
-clear salt temp
-[D2] = Z_flat(eta2,rho2,z2,z_w,H,do_scotti);
-zz2 = D2.Z - D2.Zf;
-rr2 = D2.R - D2.Rf;
+F_up = F_avg;
+F_up(zz_avg < 0) = 0;
+apev_up = g*zz_up.*rho_avg - F_up;
+apea_up = squeeze(sum(apev_up.*DZ_avg)); % [J m-2]
 
-% at start and end times (1, 2)
-T = Z_get_time_info(f_his1);
-t1 = T.ocean_time; % time in seconds
-T = Z_get_time_info(f_his2);
-t2 = T.ocean_time; % time in seconds
-DT = t2 - t1;
+F_down = F_avg;
+F_down(zz_avg >= 0) = 0;
+apev_down = g*zz_down.*rho_avg - F_down;
+apea_down = squeeze(sum(apev_down.*DZ_avg)); % [J m-2]
 
-drho_dt = (rho2-rho1)/DT;
-[D_dot] = Z_flat(eta_avg,drho_dt,z_avg,z_w_avg,H,do_scotti);
+% test of the split
+apea_alt = apea - apea_up - apea_down;
+% RESULT: this is essentially zero, so the split is good
 
 
 %% plotting
 close all
 figure
 Z_fig(14)
-set(gcf,'position',[10 10 800 600]);
-cax = [1 6];
+set(gcf,'position',[10 10 2500 1000]);
+cax = [2 6];
 
-subplot(131)
-Z_pcolorcen(G.lon_rho,G.lat_rho,log10(ape_avg));
-caxis(cax);
-shading flat
-colorbar
-title('log10 APE (J m^{-2})')
-Z_dar;
-Z_addcoast('combined',Tdir.coast);
-[xt,yt] = Z_lab('ll');
-text(xt,yt,datestr(T.time_datenum))
 
-subplot(132)
-Z_pcolorcen(G.lon_rho,G.lat_rho,log10(ape_alt));
-caxis(cax);
-shading flat
-colorbar
-title('log10 APE alt (J m^{-2})')
-Z_dar;
-Z_addcoast('combined',Tdir.coast);
-[xt,yt] = Z_lab('ll');
+fld_list = {'apea','apea_up','apea_down'};
 
-subplot(133)
-Z_pcolorcen(G.lon_rho,G.lat_rho,log10(abs(ape_avg - ape_alt)));
-caxis(cax);
-shading flat
-colorbar
-title('log10 abs Difference (J m^{-2})')
-Z_dar;
-Z_addcoast('combined',Tdir.coast);
-[xt,yt] = Z_lab('ll');
+for ii = 1:length(fld_list)
+    
+    fld_name = fld_list{ii};
+    
+    eval(['fld = ',fld_name,';']);
+    
+    fld(fld<=0) = 1e-10; % there is one bad point in the SW corner...?
+    
+    subplot(1,3,ii)
+    colormap jet
+    Z_pcolorcen(G.lon_rho,G.lat_rho,log10(fld));
+    caxis(cax);
+    shading flat
+    colorbar
+    hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
+    title(['log10 ',strrep(fld_name,'_',' '),' (J m^{-2})'])
+    Z_dar;
+    Z_addcoast('combined',Tdir.coast);
+    [xt,yt] = Z_lab('ll');
+    text(xt,yt,datestr(T.time_datenum))
+
+end
+
 
