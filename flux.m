@@ -54,6 +54,8 @@ t2 = T.ocean_time; % time in seconds
 DT = t2 - t1;
 
 %% Potential Energy calculation
+% Note: the APE calculated here does not include the contribution of the
+% free surface.  This is done later in Z_make_derived.m by adding sw.ape.
 
 % get 3D tracer diagnostics, and save into structures
 % temperature [C s-1] & salinity [psu s-1] (rho grid)
@@ -96,6 +98,22 @@ clear t3 s3 p3
 F_avg = g*(D_avg.intRf - D_avg.intRfzf);
 apev = g*zz_avg.*rho_avg - F_avg;
 p2.ape = squeeze(sum(apev.*DZ_avg)); % [J m-2]
+%
+% and save the APE -up and -down parts
+zz_up = zz_avg;
+zz_down = zz_avg;
+zz_up(zz_avg < 0) = 0;
+zz_down(zz_avg >= 0) = 0;
+%
+F_up = F_avg;
+F_up(zz_avg < 0) = 0;
+apev_up = g*zz_up.*rho_avg - F_up;
+p2.ape_up = squeeze(sum(apev_up.*DZ_avg)); % [J m-2]
+%
+F_down = F_avg;
+F_down(zz_avg >= 0) = 0;
+apev_down = g*zz_down.*rho_avg - F_down;
+p2.ape_down = squeeze(sum(apev_down.*DZ_avg)); % [J m-2]
 
 % testing: int2-int1 should be zero
 if 0
@@ -124,7 +142,6 @@ clear salt temp
 [D1] = Z_flat(eta1,rho1,rho1,z1,z_w,H);
 zz1 = D1.Z - D1.Zf;
 F1 = g*(D1.intRf - D1.intRfzf);
-
 %
 eta2 = nc_varget(f_his2,'zeta');
 [z2,z_w] = Z_s2z(G.h,eta2,S);
@@ -137,7 +154,6 @@ clear salt temp
 [D2] = Z_flat(eta2,rho2,rho2,z2,z_w,H);
 zz2 = D2.Z - D2.Zf;
 F2 = g*(D2.intRf - D2.intRfzf);
-
 
 % also create dAPE/dt from scratch to check our calculation
 % Result: may be significantly different 5/5/2015
@@ -241,6 +257,15 @@ for ii = 1:length(uv_list)
         interp2(G.lon_v,G.lat_v,kv2.(varname),G.lon_rho,G.lat_rho);
 end
 
+% form the wind work [W m-2]
+u0 = squeeze(nc_varget(f_avg,'u',[0, S.N-1, 0, 0],[1, 1, -1, -1]));
+v0 = squeeze(nc_varget(f_avg,'v',[0, S.N-1, 0, 0],[1, 1, -1, -1]));
+sustr = squeeze(nc_varget(f_avg,'sustr',[0, 0, 0],[1, -1, -1]));
+svstr = squeeze(nc_varget(f_avg,'svstr',[0, 0, 0],[1, -1, -1]));
+k2.wind_work =  ...
+        interp2(G.lon_u,G.lat_u,u0.*sustr,G.lon_rho,G.lat_rho) + ...
+        interp2(G.lon_v,G.lat_v,v0.*svstr,G.lon_rho,G.lat_rho);
+
 % form d(KE)/dt from scratch [W m-2]
 ke1 = Z_make_ke(G,S,rho0,f_his1);
 ke2 = Z_make_ke(G,S,rho0,f_his2);
@@ -252,21 +277,16 @@ k2.ke = Z_make_ke(G,S,rho0,f_avg);
 
 %% tidying up
 
-% save info
-ts_list{length(ts_list)+1} = 'dpe0dt';
-ts_list{length(ts_list)+1} = 'rate_check';
-ts_list{length(ts_list)+1} = 'ape';
-uv_list{length(uv_list)+1} = 'accel_check';
-uv_list{length(uv_list)+1} = 'ke';
-info.ts_list = ts_list; info.uv_list = uv_list;
 info.ts_avg = ts_avg; info.td_avg = td_avg;
 
-for vv = 1:length(uv_list)
-    varname = uv_list{vv};
+fnm = fieldnames(k2);
+for ii = 1:length(fnm)
+    varname = fnm{ii};
     k2.(varname)(H.island) = NaN;
 end
-for vv = 1:length(ts_list)
-    varname = ts_list{vv};
+fnm = fieldnames(p2);
+for ii = 1:length(fnm)
+    varname = fnm{ii};
     p2.(varname)(H.island) = NaN;
 end
 

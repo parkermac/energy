@@ -1,4 +1,4 @@
-function [sw,sw_list] = fluxSW(dir0,nn,island)
+function [sw] = fluxSW(dir0,nn,island)
 % 6/12/2014  Parker MacCready
 % calculates terms in the SW energy budget at a single time step [W m-2]
 %
@@ -36,22 +36,22 @@ dedt = (e2 - e1)/DT; % = deta/dt [m s-1]
 ee1 = e1.*e1; ee2 = e2.*e2;
 deedt = (ee2 - ee1)/DT; % d(eta^2)/dt [m2 s-1]
 %
-% flattened surface heights
-da = G.DX .* G.DY;
-eaf = sum(eta_avg(~island).*da(~island))/sum(da(~island));
-e1f = sum(e1(~island).*da(~island))/sum(da(~island));
-e2f = sum(e2(~island).*da(~island))/sum(da(~island));
-defdt = (e2f - e1f)/DT; % = def/dt [m s-1]
-%
-% differences from flattened state (p for prime)
-epa = eta_avg - eaf;
-ep1 = e1 - e1f;
-ep2 = e2 - e2f;
-depdt = (ep2 - ep1)/DT;
-eepa = epa.*epa;
-eep1 = ep1.*ep1;
-eep2 = ep2.*ep2;
-deepdt = (eep2 - eep1)/DT;
+% % flattened surface heights
+% da = G.DX .* G.DY;
+% eaf = sum(eta_avg(~island).*da(~island))/sum(da(~island));
+% e1f = sum(e1(~island).*da(~island))/sum(da(~island));
+% e2f = sum(e2(~island).*da(~island))/sum(da(~island));
+% defdt = (e2f - e1f)/DT; % = def/dt [m s-1]
+% %
+% % differences from flattened state (p for prime)
+% epa = eta_avg - eaf;
+% ep1 = e1 - e1f;
+% ep2 = e2 - e2f;
+% depdt = (ep2 - ep1)/DT;
+% eepa = epa.*epa;
+% eep1 = ep1.*ep1;
+% eep2 = ep2.*ep2;
+% deepdt = (eep2 - eep1)/DT;
 
 % also du/dt & dvdt
 % u_avg = nc_varget(f_avg,'ubar');
@@ -81,15 +81,15 @@ hv = hvdx ./ DX_v; % [m2 s-1] (v grid)
 pdt = 0.5*g*rho0*deedt;
 
 % rate of change of APE
-apdt = 0.5*g*rho0*deepdt;
+%apdt = 0.5*g*rho0*deepdt;
 
-% PE reservoirs
+% PE reservoir (really this is APE, referenced to z = 0)
 pe_avg = 0.5*g*rho0*eta_avg.*eta_avg;
-ape_avg = 0.5*g*rho0*eepa;
+%ape_avg = 0.5*g*rho0*eepa;
 
 % form pdt_check(s)
 pdt_check = g*rho0*eta_avg.*dedt;
-apdt_check = g*rho0*epa.*depdt;
+%apdt_check = g*rho0*epa.*depdt;
 % and a second version for PE that relies on the divergence
 dhu = diff(hudy,1,2);
 dhv = diff(hvdx,1,1);
@@ -149,26 +149,27 @@ sw = struct();
 % fluxes
 sw.kdt = re.accel + kdt_extra;
 sw.pdt = pdt;
-sw.apdt = apdt;
+%sw.apdt = apdt;
 sw.bern = re.xadv + re.yadv + re.cor + re.prsgrd + kdt_extra + sw.pdt;
-sw.abern = re.xadv + re.yadv + re.cor + re.prsgrd + kdt_extra + sw.apdt;
+%sw.abern = re.xadv + re.yadv + re.cor + re.prsgrd + kdt_extra + sw.apdt;
 sw.sstr = re.sstr;
 sw.bstr = re.bstr;
 % check fluxes
 sw.kdt_check = kdt_check;
 sw.pdt_check = pdt_check;
-sw.apdt_check = apdt_check;
+%sw.apdt_check = apdt_check;
 sw.pdt_check2 = pdt_check2;
 % reservoirs
 sw.ke = ke_avg;
 sw.pe = pe_avg;
-sw.ape = ape_avg;
+%sw.ape = ape_avg;
 
-sw_list = {'kdt','pdt','apdt','bern','abern','sstr','bstr', ...
-    'kdt_check','pdt_check','apdt_check','pdt_check2','ke','pe','ape'};
+% sw_list = {'kdt','pdt','apdt','bern','abern','sstr','bstr', ...
+%     'kdt_check','pdt_check','apdt_check','pdt_check2','ke','pe','ape'};
 
-for vv = 1:length(sw_list)
-    varname = sw_list{vv};
+fnm = fieldnames(sw);
+for ii = 1:length(fnm)
+    varname = fnm{ii};
     sw.(varname)(island) = NaN;
 end
 

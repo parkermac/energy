@@ -1,4 +1,4 @@
-%% flux_lp.m  5/8/2015  Parker MacCready
+%% flux_lp.m  5/21/2015  Parker MacCready
 %
 % does low-pass filtering of the vertically-integrated flux terms
 % calculated by flux.m (via flux_driver.m)
@@ -8,9 +8,13 @@ addpath('./Zfun');
 odir_top = [Tdir.output,'energy_out/'];
 
 % set indices of times to average around
-%nn_center_vec = 1848;
-% for Cdia2005 we have 1:8760
-nn_center_vec = 36:24:8760-36
+if 1
+    nn_center_vec = 1836;
+else
+    % for Cdia2005 we have 1:8760
+    nn_center_vec = 36:24:8760-36;
+end
+
 % set size of averaging window
 win_len = 71;
 
@@ -65,29 +69,36 @@ for cc = nn_center_vec % start of "day" loop
                     
         load(fn_in)
         
+        if nn == cc % save the time of the center of the window
+            center_info = info;
+        end
+        
         % loop over the variables
-        for ii = 1:length(info.ts_list)
-            var = info.ts_list{ii};
+        fnm = fieldnames(p2);
+        for ii = 1:length(fnm)
+            varname = fnm{ii};
             if ww==1
-                P2.(var) = wt(ww)*p2.(var);
+                P2.(varname) = wt(ww)*p2.(varname);
             else
-                P2.(var) = P2.(var) + wt(ww)*p2.(var);
+                P2.(varname) = P2.(varname) + wt(ww)*p2.(varname);
             end
         end
-        for ii = 1:length(info.uv_list)
-            var = info.uv_list{ii};
+        fnm = fieldnames(k2);
+        for ii = 1:length(fnm)
+            varname = fnm{ii};
             if ww==1
-                K2.(var) = wt(ww)*k2.(var);
+                K2.(varname) = wt(ww)*k2.(varname);
             else
-                K2.(var) = K2.(var) + wt(ww)*k2.(var);
+                K2.(varname) = K2.(varname) + wt(ww)*k2.(varname);
             end
         end
-        for ii = 1:length(info.sw_list)
-            var = info.sw_list{ii};
+        fnm = fieldnames(sw);
+        for ii = 1:length(fnm)
+            varname = fnm{ii};
             if ww==1
-                SW.(var) = wt(ww)*sw.(var);
+                SW.(varname) = wt(ww)*sw.(varname);
             else
-                SW.(var) = SW.(var) + wt(ww)*sw.(var);
+                SW.(varname) = SW.(varname) + wt(ww)*sw.(varname);
             end
         end
      
@@ -96,9 +107,8 @@ for cc = nn_center_vec % start of "day" loop
     p2 = P2;
     k2 = K2;
     sw = SW;
+    info = center_info;
     
-    % note: we should fix this so it saves info for the center file.
-    % so that the time stamp matches the center, instead of the end
     save(fn_out,'p2','k2','sw','info')
         
     dt = toc; disp(['   - took ',num2str(round(dt)),' sec'])

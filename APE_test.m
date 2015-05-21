@@ -7,7 +7,7 @@ clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
 basename = 'D2005';
-nn = 1848; %
+nn = 1836; %
 dir1 = '/Users/PM5/Documents/roms/output/';
 dir0.avg = [dir1,basename,'_avg/'];
 dir0.dia = [dir1,basename,'_dia/'];

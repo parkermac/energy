@@ -9,7 +9,7 @@ addpath('./Zfun');
 close all
 
 % set the file name to look at
-nn = 3000;
+nn = 1836;
 ncpad = ['0000',num2str(nn)]; ncpad = ncpad(end-4:end);
 infile = ['flux_',ncpad,'.mat'];
 

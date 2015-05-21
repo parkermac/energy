@@ -8,12 +8,15 @@ cax = scl*[-1 1];
 
 
 sw_list = {'kdt','pdt','bern','diss'};
-i2_list = {'kdt','pdt','bern','diss'};
+i2_list = {'kdt','pdt','bern','diss','wind_work'};
+
+NR = 2;
+NC = 6;
 
 for ii = 1:length(sw_list)
     fld_name = sw_list{ii};
     fld = sw.(fld_name);
-    subplot(2,4,ii)
+    subplot(NR,NC,ii)
     Z_pcolorcen(G.lon_rho,G.lat_rho,fld);
     caxis(cax);
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
@@ -25,7 +28,7 @@ end
 for ii = 1:length(i2_list)
     fld_name = i2_list{ii};
     fld = i2.(fld_name);
-    subplot(2,4,4+ii)
+    subplot(NR,NC,NC+ii)
     Z_pcolorcen(G.lon_rho,G.lat_rho,fld);
     caxis(cax);
     if ii == 1

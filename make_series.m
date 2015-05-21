@@ -5,10 +5,15 @@ clear
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-pth = '/Users/PM3/Documents/tools_output/energy_out/Cdia2005/flux_raw/';
-nn_vec = 1:8760;
+if 0
+    pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_raw/';
+    nn_vec = 1:8760;
+else
+    pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
+    nn_vec = 36:24:8760-36;
+end
 
-island_tag = 'abyss';
+island_tag = 'full'; % salish, shelf, abyss, full
 
 load([pth,'G.mat']); % has island
 
@@ -24,7 +29,7 @@ for nn = nn_vec
     if(mod(nn,10)==0); disp(['Working on ',infile]); end;
     load([pth,infile]);
     td_vec(tt) = info.td_avg;
-    [p2,k2,e2,sw,info] = Z_make_derived(p2,k2,sw,info);
+    [p2,k2,e2,i2,sw,info] = Z_make_derived(p2,k2,sw,info);
     
     if tt==1
         
@@ -60,21 +65,30 @@ for nn = nn_vec
     % do area integrals to get volume integrals (Watts)
     % (or Joules for ape_avg)
     
-    for vv = 1:length(info.ts_list)
-        vname = info.ts_list{vv};
-        P2.(vname)(tt) = squeeze(nansum(p2.(vname)(:).*DA(:)));
+    fnm = fieldnames(p2);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        P2.(varname)(tt) = squeeze(nansum(p2.(varname)(:).*DA(:)));
     end
-    for vv = 1:length(info.uv_list)
-        vname = info.uv_list{vv};
-        K2.(vname)(tt) = squeeze(nansum(k2.(vname)(:).*DA(:)));
+    fnm = fieldnames(k2);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        K2.(varname)(tt) = squeeze(nansum(k2.(varname)(:).*DA(:)));
     end
-    for vv = 1:length(info.e2_list)
-        vname = info.e2_list{vv};
-        E2.(vname)(tt) = squeeze(nansum(e2.(vname)(:).*DA(:)));
+    fnm = fieldnames(e2);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        E2.(varname)(tt) = squeeze(nansum(e2.(varname)(:).*DA(:)));
     end
-    for vv = 1:length(info.sw_list)
-        vname = info.sw_list{vv};
-        SW.(vname)(tt) = squeeze(nansum(sw.(vname)(:).*DA(:)));
+    fnm = fieldnames(i2);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        I2.(varname)(tt) = squeeze(nansum(i2.(varname)(:).*DA(:)));
+    end
+    fnm = fieldnames(sw);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        SW.(varname)(tt) = squeeze(nansum(sw.(varname)(:).*DA(:)));
     end
     
 end
@@ -84,5 +98,5 @@ info.td_vec = td_vec;
 info.area = nansum(DA(:));
 info.volume = nansum(DA(:).*G.h(:));
 
-save([pth,'series_',island_tag,'.mat'],'P2','K2','E2','SW','info');
+save([pth,'series_',island_tag,'.mat'],'P2','K2','E2','I2','SW','info');
 

@@ -6,7 +6,7 @@ clear
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-pth = '/Users/PM3/Documents/tools_output/energy_out/Cdia2005/flux_raw/';
+pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_raw/';
 nn_vec = 1:8760;
 NT = length(nn_vec);
 

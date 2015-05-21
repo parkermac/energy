@@ -49,8 +49,7 @@ for ii = 1:length(nn_vec);
     tic
     nn = nn_vec(ii);
     [p2,k2,info] = flux(dir0,nn,H);
-    [sw,sw_list] = fluxSW(dir0,nn,island);
-    info.sw_list = sw_list;
+    [sw] = fluxSW(dir0,nn,island);
     ncpad = ['0000',num2str(nn)]; ncpad = ncpad(end-4:end);
     save([odir,'flux_',ncpad,'.mat'],'p2','k2','sw','info');
     dt = toc; disp(['file ',ncpad,' took ',num2str(round(dt)),' sec'])
