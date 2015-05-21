@@ -6,7 +6,7 @@ function [basename,nn_vec,dir0] = Z_runspec_raw
 % the intention is that you just change "calc_name" here when moving to
 % different computers
 
-calc_name = 'mac1';
+calc_name = 'fjo';
 
 switch calc_name
     case 'mac0' % single time, for testing
