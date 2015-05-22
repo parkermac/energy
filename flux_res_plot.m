@@ -6,16 +6,16 @@ clear
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-do_flux = 1;
+do_flux = 0;
 
-if 1 % user selection
+if 0 % user selection
     pth0 = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/';
     [fn,pth] = uigetfile(pth0,'Select .mat file(s) to plot', ...
         'multiselect','on');
 else % for plot development
     fn = 'flux_01836.mat';
     pth = ['/Users/PM5/Documents/tools_output/energy_out/', ...
-        'Cdia2005/flux_lp71/']; % _raw or _lp71
+        'D2005/flux_raw/']; % _raw or _lp71
 end
 
 lp_test = strfind(pth,'lp71');
@@ -57,7 +57,7 @@ for tt = 1:ntt % MOVIE loop start (or just make single plot)
         Z_flux_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fnt);
         odir_name = 'a_flux_movie';
     else
-        Z_res_plot(G,p2,k2,e2,sw,do_lp,Tdir,info);
+        Z_res_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,info);
         odir_name = 'a_res_movie';
     end
     
