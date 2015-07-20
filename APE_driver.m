@@ -4,7 +4,7 @@ function APE_driver(calc_name)
 % Calculates the exact APE (but neglecting compressibility).
 
 % set up the environment
-clear; addpath('../alpha/'); Tdir = toolstart;
+addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
 % get info for processing
