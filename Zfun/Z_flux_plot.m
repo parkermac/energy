@@ -1,4 +1,5 @@
-function Z_flux_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fn)
+function Z_flux_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fn,info)
+%function Z_res_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,info)
 % 5/12/2015  Parker MacCready
 
 colormap jet;

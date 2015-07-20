@@ -23,11 +23,16 @@ daa = da(~island);
 %
 [hh,ind] = sort(hh,'descend'); % deepest to shallowest
 daa = daa(ind);
+
 % three vectors, deepest to shallowest, relating z, volume below z,
 % and area at z
+
 ZZ = [-hh(2:end); 10]; % z of the next shallowest grid cell, with padding
+
 AA = cumsum(daa); % area of all cells that are deeper than ZZ
 %
+VV = nan(size(hh)); % preallocate
+
 for ii = 1:length(hh)
     VV(ii,1) = sum((hh(1:ii)+ZZ(ii)).*daa(1:ii));
 end
@@ -35,10 +40,11 @@ end
 ZZ = [-hh(1); ZZ];
 AA = [0; AA];
 VV = [0; VV];
-% VV = volume below ZZ of all cells that are deeper than ZZ
+% VV = volume of all cells that are deeper than ZZ
 %
-% V_check = sum(daa.*(hh + eta_flat));
+% V_check = sum(daa.*hh);
 % Result: V_check is exactly the same as VV(end)
+
 %
 % remove repeat values, where ZZ and VV are not changing, even though AA is
 [Vh,indh] = unique(VV);

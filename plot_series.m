@@ -5,7 +5,7 @@
 clear
 addpath('../alpha/'); Tdir = toolstart;
 
-island_tag = 'salish'; % salish, shelf, abyss, full
+island_tag = 'full'; % salish, shelf, abyss, full
 dlim = [0 365]; % full year is [0 365];
 
 pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
@@ -21,6 +21,7 @@ NT = length(day);
 close all
 Z_fig(14);
 set(gcf,'position',[200 50 1800 1200]);
+set(gcf,'PaperPositionMode','auto');
 
 subplot(411)
 plot(day,I2.edt,'-r', ...
@@ -40,20 +41,23 @@ subplot(412)
 plot(day,P2.hdiff,'-r', ...
     day,P2.vdiff,'-b', ...
     day,SW.sstr,'-g', ...
+    day,K2.wind_work,'m', ...
     'linewidth',2)
 title('Selected Turbulent Rates [W]')
-legend('PE hdiff','PE vdiff','SW sstr',0)
+legend('PE hdiff','PE vdiff','SW sstr','Wind Work',0)
 set(gca,'xlim',dlim);
 grid on
 
 subplot(413)
 plot(day,P2.ape,'-r', ...
+    day,P2.ape_up,'--r', ...
+    day,P2.ape_down,':r', ...
     day,K2.ke - SW.ke,'-b', ...
     day,SW.pe,'-m', ...
     day,SW.ke,'-c', ...
     'linewidth',2)
 title('Reservoirs [J]')
-legend('APE','KE (Full-SW)','APE SW','KE SW',0)
+legend('APE','APE up','APE down','KE (Full-SW)','APE SW','KE SW',0)
 set(gca,'xlim',dlim);
 grid on
 
@@ -88,6 +92,9 @@ text(xt,yt,'DOWNWELLING','color','g','fontweight','bold','fontsize',18)
 text(xt,yt,'UPWELLING','color','m','fontweight','bold','fontsize',18)
 
 plot([1:365],qcr/3e4,'-b','linewidth',3)
+
+%%
+print('-djpeg100',['/Users/PM5/Desktop/',island_tag,'.jpg']);
 
 
 

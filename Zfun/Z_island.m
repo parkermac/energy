@@ -8,8 +8,9 @@ function island = Z_island(G)
 
 island = ~G.mask_rho; 
 % mask out nudging regions
-island(1:8,:) = 1;
-island(:,1:8) = 1;
+nn = 8; % original is 8 (9 MAY make bad point go away)
+island(1:nn,:) = 1;
+island(:,1:nn) = 1;
 % and regions to north and east
 island(end-1:end,:) = 1;
 island(:,end-1:end) = 1;

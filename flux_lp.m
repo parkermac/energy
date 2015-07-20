@@ -8,7 +8,7 @@ addpath('./Zfun');
 odir_top = [Tdir.output,'energy_out/'];
 
 % set indices of times to average around
-if 1
+if 0
     nn_center_vec = 1836;
 else
     % for Cdia2005 we have 1:8760
@@ -19,7 +19,7 @@ end
 win_len = 71;
 
 % input directory
-[basename,nn_vec,dir0] = Z_runspec_raw;
+[basename,nn_vec,dir0] = Z_runspec_raw; % just to get basename
 idir = [odir_top,basename,'/flux_raw/'];
 
 % create EMPTY result directory, specific to this window length

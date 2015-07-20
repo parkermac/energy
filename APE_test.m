@@ -1,6 +1,10 @@
 % APE_test.m  6/12/2014  Parker MacCready
 %
 % code to test different methods to calculate APE per unit area
+%
+% Added lines to make apev positive definite.  There were a few very small
+% negative points in the test case (min was -1.8e-9 compared to a median of
+% +6 and a mean of +77 in apev).  This could be due to roundoff error.
 
 % set up the environment
 clear; addpath('../alpha/'); Tdir = toolstart;
@@ -15,18 +19,18 @@ dir0.his = [dir1,basename,'_his/'];
 %% get hypsometry structure H
 
 ns = num2str(nn); ns = ['0000',ns]; ns = ns(end-3:end);
-fn = [dir0.his,'ocean_his_',ns,'.nc'];
+%fn = [dir0.his,'ocean_his_',ns,'.nc'];
+fn = [dir0.avg,'ocean_avg_',ns,'.nc'];
 [G,S,T] = Z_get_basic_info(fn);
 
 island = Z_island(G);
 
 [H] = Z_hyp(G,S,island);
 
-%% calculate APE in different ways
+%% calculate APE
 
 % constants
 g = 9.81;
-g2 = g/2;
 rho0 = 1023.7; % set in the ROMS parameters
 offset = 1000; % to add to the density anomaly
 
@@ -52,7 +56,7 @@ temp = nc_varget(f_avg,'temp');
 
 [den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z_avg);
 rho_avg = den1 + offset;
-rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
+%rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
 [D_avg] = Z_flat(eta_avg,rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;
 rr_avg = D_avg.R - D_avg.Rf;
@@ -63,22 +67,22 @@ zz_down = zz_avg;
 zz_up(zz_avg < 0) = 0;
 zz_down(zz_avg >= 0) = 0;
 
-% create the approximate APE
-%apea_approx = squeeze(sum(g2*zz_avg.*DZ_avg.*rr_avg)); % [J m-2]
-
 % create exact APE (neglecting compressibility)
 F_avg = g*(D_avg.intRf - D_avg.intRfzf);
 apev = g*zz_avg.*rho_avg - F_avg;
+apev(apev < 0) = 0;
 apea = squeeze(sum(apev.*DZ_avg)); % [J m-2]
 
 F_up = F_avg;
 F_up(zz_avg < 0) = 0;
 apev_up = g*zz_up.*rho_avg - F_up;
+apev_up(apev_up < 0) = 0;
 apea_up = squeeze(sum(apev_up.*DZ_avg)); % [J m-2]
 
 F_down = F_avg;
 F_down(zz_avg >= 0) = 0;
 apev_down = g*zz_down.*rho_avg - F_down;
+apev_down(apev_down < 0) = 0;
 apea_down = squeeze(sum(apev_down.*DZ_avg)); % [J m-2]
 
 % test of the split
@@ -102,7 +106,7 @@ for ii = 1:length(fld_list)
     
     eval(['fld = ',fld_name,';']);
     
-    fld(fld<=0) = 1e-10; % there is one bad point in the SW corner...?
+    fld(fld<0) = nan; % there is one bad point in the SW corner...?
     
     subplot(1,3,ii)
     colormap jet

@@ -1,4 +1,4 @@
-% make_series.m  6/18/2014  Parker MacCready
+% make_series.m  5/24/2015  Parker MacCready
 %
 
 clear
@@ -68,6 +68,16 @@ for nn = nn_vec
     fnm = fieldnames(p2);
     for ii = 1:length(fnm)
         varname = fnm{ii};
+        if sum(strcmp(varname,{'ape','ape_up','ape_down'}))
+            mask = p2.(varname) <= 0;
+            p2.(varname)(mask) = 1e-10;
+            if 0
+                isneg = nansum(p2.(varname)(:) < 0);
+                if isneg > 0
+                    disp(['nn=',num2str(nn),' has ',num2str(isneg),' negative points']);
+                end
+            end
+        end
         P2.(varname)(tt) = squeeze(nansum(p2.(varname)(:).*DA(:)));
     end
     fnm = fieldnames(k2);

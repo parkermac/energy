@@ -1,4 +1,4 @@
-% sw_fix.m  6/18/2014  Parker MacCready
+% sw_fix.m  5/24/2015  Parker MacCready
 %
 % patches over (7) jumps in the sw flux fields
 
@@ -28,12 +28,12 @@ for nn = nn_vec
         DA(G.island) = NaN;
     end
     
-    sw_aedt = sw.kdt + sw.apdt;
+    sw_edt = sw.kdt + sw.pdt;
     sw_diss = sw.sstr + sw.bstr;
-    sw_aerr = sw_aedt - sw.abern - sw_diss;
-    SW_aerr = squeeze(nansum(sw_aerr(:).*DA(:)));
+    sw_err = sw_edt - sw.bern - sw_diss;
+    SW_err = squeeze(nansum(sw_err(:).*DA(:)));
     
-    if abs(SW_aerr) > 1e4;
+    if abs(SW_err) > 1e4;
         
         disp(['Patching file ',num2str(nn)]);
         
@@ -55,14 +55,15 @@ for nn = nn_vec
             f2 = load([pth,infile2]);
         end
 
-        for vv = 1:length(info.sw_list)
-            vname = info.sw_list{vv};
+        fnm = fieldnames(sw);
+        for ii = 1:length(fnm)
+            varname = fnm{ii};
             if tt==1
-                sw.(vname) = f2.sw.(vname);
+                sw.(varname) = f2.sw.(varname);
             elseif tt==NT;
-                sw.(vname) = f1.sw.(vname);
+                sw.(varname) = f1.sw.(varname);
             else
-                sw.(vname) = (f1.sw.(vname) + f2.sw.(vname))/2;
+                sw.(varname) = (f1.sw.(varname) + f2.sw.(varname))/2;
             end
         end
 
