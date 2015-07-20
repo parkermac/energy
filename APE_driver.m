@@ -10,15 +10,15 @@ addpath('./Zfun');
 % get info for processing
 switch calc_name
     case 'mac0' % single time, for testing
-        basename = 'D2005';
+        basename = 'D2005_his';
         nn_vec = 1836; %
         dir00 = '/Users/PM5/Documents/roms/output/';
     case 'mac1' % a longer series, suitable for averaging
-        basename = 'D2005';
+        basename = 'D2005_his';
         nn_vec = 1800:1928; % avg & dia - have 1800:1928 (his to 1929)
         dir00 = '/Users/PM5/Documents/roms/output/';
     case 'fjo' % fjord, for the full year
-        basename = 'Cdia2005';
+        basename = 'Cdia2005_his';
         nn_vec = 1:8760; % avg & dia - have 1:8760 (his to 8761)
         dir00 = '/data1/parker/roms/output/';
     case 's45_2005' 
@@ -38,7 +38,7 @@ switch calc_name
         nn_vec = 1:366; 
         dir00 = '/pmraid4/parker/roms/output/';        
 end
-dir0 = [dir00,basename,'_his/'];
+dir0 = [dir00,basename,'/'];
 
 % create top level output directory, if needed
 odir_top = [Tdir.output,'APE_out/'];
