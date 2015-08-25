@@ -5,7 +5,7 @@
 clear
 addpath('../alpha/'); Tdir = toolstart;
 
-island_tag = 'full'; % salish, shelf, abyss, full
+island_tag = 'shelf'; % salish, shelf, abyss, full
 dlim = [0 365]; % full year is [0 365];
 
 pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
@@ -94,7 +94,7 @@ text(xt,yt,'UPWELLING','color','m','fontweight','bold','fontsize',18)
 plot([1:365],qcr/3e4,'-b','linewidth',3)
 
 %%
-print('-djpeg100',['/Users/PM5/Desktop/',island_tag,'.jpg']);
+%print('-djpeg100',['/Users/PM5/Desktop/',island_tag,'.jpg']);
 
 
 

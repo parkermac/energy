@@ -8,7 +8,10 @@ addpath('./Zfun');
 fn = '/Users/PM5/Documents/roms/output/D2005_avg/ocean_avg_1836.nc';
 
 %% call the function
-[G, apea, apea_up, apea_down, zz, rr] = Z_ape(fn);
+[G,S,T] = Z_get_basic_info(fn);
+island = Z_island(G);
+[H] = Z_hyp(G,S,island);
+[apea, apea_up, apea_down, zz, rr] = Z_ape(fn,G,S,H);
 
 %% plotting
 close all

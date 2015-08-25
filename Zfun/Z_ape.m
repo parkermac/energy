@@ -1,13 +1,8 @@
-function [G, apea, apea_up, apea_down, zz, rr] = Z_ape(fn)
+function [apea, apea_up, apea_down, zz, rr] = Z_ape(fn,G,S,H)
 % Parker MacCready
 %
 % code to to calculate APE per unit area
 
-[G,S,T] = Z_get_basic_info(fn);
-
-island = Z_island(G);
-
-[H] = Z_hyp(G,S,island);
 
 %% calculate APE
 
