@@ -1,6 +1,4 @@
 function [p2,k2,info] = flux(dir0,nn,H)
-% 5/1/2015  Parker MacCready
-%
 % calculates terms in the 3D energy budget at a single time step
 % then returns vertical integrals [W m-2]
 %
@@ -16,6 +14,8 @@ function [p2,k2,info] = flux(dir0,nn,H)
 %
 % * uses hdiff instead of xdiff + ydiff for the tracer advection, which
 %   leads to nearly exact APE balance (see dia_DEBUG.m)
+%
+% * assumes eta = 0 for most of the terms in the internal APE budget.
 
 %% set values
 
@@ -44,7 +44,7 @@ f_his2 = [dir0.his,'ocean_his_',ns2,'.nc'];
 ts_avg = T.ocean_time;
 td_avg = T.time_datenum;
 eta_avg = nc_varget(f_avg,'zeta');
-[z_avg,z_w_avg] = Z_s2z(G.h,eta_avg,S);
+[z_avg,z_w_avg] = Z_s2z(G.h,0*eta_avg,S);
 DZ_avg = diff(z_w_avg);
 % at start and end times (1, 2)
 T = Z_get_time_info(f_his1);
@@ -67,67 +67,34 @@ for ii = 1:length(ts_list)
     s3.(varname) = nc_varget(f_dia,sname);
 end
 
-salt = nc_varget(f_avg,'salt');
-temp = nc_varget(f_avg,'temp');
-
+salt_avg = nc_varget(f_avg,'salt');
+temp_avg = nc_varget(f_avg,'temp');
 % see written notes for explanation
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z_avg);
+[~,den1,alpha_avg,beta_avg] = Z_roms_eos_vec(salt_avg,temp_avg,z_avg);
 rho_avg = den1 + offset;
 % NOTE: the alpha and beta are
 % in situ values, whereas the density we use is referenced to zero
 % pressure.  The difference of these terms for s=31, theta=8 between 0 and
 % 1000 m is 1.2% for beta, but 14% for alpha. 5/4/2015
-% 5/14/2015 Thought: maybe we should use alpha and beta for 0*z_avg?
-rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
-[D_avg] = Z_flat(eta_avg,rho_avg,rho_avg,z_avg,z_w_avg,H);
+% It is not clear which is correct.
+[D_avg] = Z_flat(rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;
-rr_avg = D_avg.R - D_avg.Rf; % Not used?
-clear salt temp
 
 % form vertically-integrated PE terms
 for ii = 1:length(ts_list)
     varname = ts_list{ii};
-    p3.(varname) = -alpha.*t3.(varname) + beta.*s3.(varname);
+    p3.(varname) = -alpha_avg.*t3.(varname) + beta_avg.*s3.(varname);
     p2.(varname) = squeeze(sum(g*zz_avg.*rho_avg.*DZ_avg.*p3.(varname)));
 end
 % terms in p2 are [W m-2]
 
 clear t3 s3 p3
 
-% also save the APE itself
-F_avg = g*(D_avg.intRf - D_avg.intRfzf);
-apev = g*zz_avg.*rho_avg - F_avg;
-p2.ape = squeeze(sum(apev.*DZ_avg)); % [J m-2]
-%
-% and save the APE -up and -down parts
-zz_up = zz_avg;
-zz_down = zz_avg;
-zz_up(zz_avg < 0) = 0;
-zz_down(zz_avg >= 0) = 0;
-%
-F_up = F_avg;
-F_up(zz_avg < 0) = 0;
-apev_up = g*zz_up.*rho_avg - F_up;
-p2.ape_up = squeeze(sum(apev_up.*DZ_avg)); % [J m-2]
-%
-F_down = F_avg;
-F_down(zz_avg >= 0) = 0;
-apev_down = g*zz_down.*rho_avg - F_down;
-p2.ape_down = squeeze(sum(apev_down.*DZ_avg)); % [J m-2]
+% also save the APE itself, and up- down- versions
+[p2.ape, p2.ape_up, p2.ape_down] = Z_ape(f_avg,G,S,H);
 
-% testing: int2-int1 should be zero
-if 0
-    int1 = nansum(D_avg.DV(:) .* D_avg.intRf(:));
-    int2 = nansum(D_avg.DV(:) .* D_avg.intRfzf(:));
-    disp(['int1=',num2str(int1)]);
-    disp(['int2=',num2str(int2)]);
-    disp(['(int2-int1)/int1=',num2str((int2-int1)/int1)]);
-end
-% Result: error is 3e-5 (out of 1)
-
-% we have to add a term to the rate to get it to represent the
-% quantity we want, and this extra term will be added to the
-% advective terms on the RHS to ensure balance
+% We have to add some terms to get the LHS to be the rate that
+% we want.  These will be added to the RHS to ensure balance.
 
 % first get some start and end values
 %
@@ -136,68 +103,53 @@ eta1 = nc_varget(f_his1,'zeta');
 DZ1 = diff(z_w);
 salt = nc_varget(f_his1,'salt');
 temp = nc_varget(f_his1,'temp');
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z1);
+[~,den1,~,~] = Z_roms_eos_vec(salt,temp,z1);
 rho1 = den1 + offset;
 clear salt temp
-[D1] = Z_flat(eta1,rho1,rho1,z1,z_w,H);
-zz1 = D1.Z - D1.Zf;
-F1 = g*(D1.intRf - D1.intRfzf);
+[D1] = Z_flat(rho1,rho1,z1,z_w,H);
 %
 eta2 = nc_varget(f_his2,'zeta');
 [z2,z_w] = Z_s2z(G.h,eta2,S);
 DZ2 = diff(z_w);
 salt = nc_varget(f_his2,'salt');
 temp = nc_varget(f_his2,'temp');
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z2);
+[~,den1,~,~] = Z_roms_eos_vec(salt,temp,z2);
 rho2 = den1 + offset;
 clear salt temp
-[D2] = Z_flat(eta2,rho2,rho2,z2,z_w,H);
-zz2 = D2.Z - D2.Zf;
-F2 = g*(D2.intRf - D2.intRfzf);
-
-% also create dAPE/dt from scratch to check our calculation
-% Result: may be significantly different 5/5/2015
-% perhaps this calculation is subject to errors?
-apev1 = g*zz1.*rho1 - F1;
-apev2 = g*zz2.*rho2 - F2;
-ape1 = squeeze(sum(apev1.*DZ1)); % [J m-2]
-ape2 = squeeze(sum(apev2.*DZ2)); % [J m-2]
-p2.rate_check = (ape2 - ape1)/DT;
+[D2] = Z_flat(rho2,rho2,z2,z_w,H);
 
 % then make additional PE terms to make storage rate meaningful
-%
-dapedt_uno = squeeze(sum((g*zz_avg.*rho00 - F_avg).*(DZ2 - DZ1)/DT));
 
-% this is for the term associated with rate of change of rho_flat.
-% NOTE: this seems wrong - why am I calculating it using (rho2-rho1)??
-fld = (rho2 - rho1)/DT;
-[D_dot] = Z_flat(eta_avg,rho_avg,fld,z_avg,z_w_avg,H);
+% rate stuff associated with delta_t
+albet = alpha_avg.*temp_avg - beta_avg.*salt_avg;
+dapedt_uno = squeeze(sum(g*zz_avg.*rho_avg.*(albet).*(DZ2 - DZ1)/DT));
+
+% term associated with rate of change of rho_flat.
+fld = (D2.Rf - D1.Rf)/DT;
+[D_dot] = Z_flat(rho_avg,fld,z_avg,z_w_avg,H);
 F_dot = g*(D_dot.intFf - D_dot.intFfzf);
 dapedt_dos = squeeze(sum(-F_dot.*DZ_avg));
 
-% testing: int2-int1 should be zero
-if 0
-    int1 = nansum(D_avg.DV(:) .* D_dot.intFf(:));
-    int2 = nansum(D_avg.DV(:) .* D_dot.intFfzf(:));
-    disp(['int1=',num2str(int1)]);
-    disp(['int2=',num2str(int2)]);
-    disp(['(int2-int1)/int1=',num2str((int2-int1)/int1)]);
-end
-% Result: error is 5e-4 (out of 1)
-
 % and add them to the results
-p2.rate = p2.rate + dapedt_uno + dapedt_dos;
+p2.rate = p2.rate + dapedt_uno;
+p2.rate = p2.rate + dapedt_dos;
+
 p2.vadv = p2.vadv + dapedt_uno;
 p2.dpe0dt = dapedt_dos;
+
+% also create dAPEa/dt from scratch to check our calculation
+[apea1, ~, ~] = Z_ape(f_his1,G,S,H);
+[apea2, ~, ~] = Z_ape(f_his2,G,S,H);
+p2.rate_check = (apea2 - apea1)/DT;
 
 % cleaning up
 clear pe1 pe2
 clear dpedt1 dpedt2 dpedt3
 clear rho_avg rho1 rho2
 clear zz_avg zz1 zz2 rr_avg rr1 rr2 D_avg D1 D2
-clear alpha beta den den1
-clear apev1 apev2 ape1 ape2
-clear F1 F2 F_dot dapedt_uno dapedt_dos
+clear alpha beta den1
+clear apea1 apea2
+clear F1 F2 F_dot dapedt_uno dapedt_dos albet
 
 %% Kinetic Energy calculation
 

@@ -54,7 +54,6 @@ end
 
 salt_avg = nc_varget(f_avg,'salt');
 temp_avg = nc_varget(f_avg,'temp');
-
 % see written notes for explanation
 [~,den1,alpha_avg,beta_avg] = Z_roms_eos_vec(salt_avg,temp_avg,z_avg);
 rho_avg = den1 + offset;
@@ -65,8 +64,6 @@ rho_avg = den1 + offset;
 % It is not clear which is correct.
 [D_avg] = Z_flat(rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;
-
-clear salt temp
 
 % form vertically-integrated PE terms
 for ii = 1:length(ts_list)
