@@ -1,19 +1,20 @@
 function [apea, apea_up, apea_down] = Z_ape(fn,G,S,H)
 % Parker MacCready
 %
-% code to to calculate APE per unit area
+% Code to to calculate APE per unit area.  This is just the part associated
+% with the density field deformations, and so we assume eta = 0.  The free
+% surface contribution is added in later through the SW term.
 
 
 %% calculate APE
 
 % constants
 g = 9.81;
-rho0 = 1023.7; % set in the ROMS parameters
 offset = 1000; % to add to the density anomaly
 
 % space info
 eta = nc_varget(fn,'zeta');
-[zr,zw] = Z_s2z(G.h,eta,S);
+[zr,zw] = Z_s2z(G.h,0*eta,S);
 DZ = diff(zw);
 
 % Debugging: print eta_flat
@@ -29,7 +30,7 @@ end
 salt = nc_varget(fn,'salt');
 temp = nc_varget(fn,'temp');
 
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,zr);
+[~,den1,~,~] = Z_roms_eos_vec(salt,temp,zr);
 rho = den1 + offset; % use potential density
 
 [D] = Z_flat(rho,rho,zr,zw,H);
@@ -45,11 +46,13 @@ zz_down(zz >= 0) = 0;
 % create exact APE (neglecting compressibility)
 F = g*(D.intRf - D.intRfzf);
 apev = g*zz.*rho - F;
-disp('Warning: making apev non-negative')
-disp(['  Number of negative points = ',num2str(nansum(apev(:) < 0))])
-disp(['  Mean of negative points = ',num2str(nanmean(apev((apev(:) < 0))))])
-disp(['  Largest of negative points = ',num2str(nanmin(apev((apev(:) < 0))))])
-disp(['  Mean of all points = ',num2str(nanmean(apev(:)))])
+if 0
+    disp('Warning: making apev non-negative')
+    disp(['  Number of negative points = ',num2str(nansum(apev(:) < 0))])
+    disp(['  Mean of negative points = ',num2str(nanmean(apev((apev(:) < 0))))])
+    disp(['  Largest of negative points = ',num2str(nanmin(apev((apev(:) < 0))))])
+    disp(['  Mean of all points = ',num2str(nanmean(apev(:)))])
+end
 apev(apev < 0) = 0;
 apea = squeeze(sum(apev.*DZ)); % [J m-2]
 
