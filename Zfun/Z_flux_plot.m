@@ -9,25 +9,30 @@ cax = scl*[-1 1];
 
 
 sw_list = {'kdt','pdt','bern','diss'};
-i2_list = {'kdt','pdt','bern','diss','wind_work'};
+sw_name_list = {'SW dKE/dt','SW dAPE/dt','SW Bernoulli','SW Dissipation'};
+i2_list = {'kdt','pdt','bern','diss','background'};
+i2_name_list = {'dKE^{\prime}/dt','dAPE^{\prime}/dt','Bernoulli^{\prime}', ...
+    'Diss^{\prime} + Mixing','Background'};
 
 NR = 2;
 NC = 6;
 
 for ii = 1:length(sw_list)
     fld_name = sw_list{ii};
+    fld_title = sw_name_list{ii};
     fld = sw.(fld_name);
     subplot(NR,NC,ii)
     Z_pcolorcen(G.lon_rho,G.lat_rho,fld);
     caxis(cax);
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
-    title(['sw ',strrep(fld_name,'_',' '),' (W m^{-2})'])
+    title([fld_title,' (W m^{-2})'])
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
 end
 
 for ii = 1:length(i2_list)
     fld_name = i2_list{ii};
+    fld_title = i2_name_list{ii};
     fld = i2.(fld_name);
     subplot(NR,NC,NC+ii)
     Z_pcolorcen(G.lon_rho,G.lat_rho,fld);
@@ -40,9 +45,9 @@ for ii = 1:length(i2_list)
         text(xt,yt,[tag,' ',ttext], ...
             'horizontalalignment','r');
     end
-    if ii == 4; colorbar('south'); end;
+    if ii == 5; colorbar('south'); end;
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
-    title(['i2 ',strrep(fld_name,'_',' '),' (W m^{-2})'])
+    title([fld_title,' (W m^{-2})'])
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
 end

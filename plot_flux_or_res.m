@@ -1,19 +1,17 @@
-%% flux_res_plot.m  6/1/2015  Parker MacCready
-%
-% plots fluxes or reservoirs
+% Plots fluxes or reservoirs.
 
 clear
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-do_flux = 0;
+do_flux = 1;
 
 if 0 % user selection
     pth0 = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/';
     [fn,pth] = uigetfile(pth0,'Select .mat file(s) to plot', ...
         'multiselect','on');
 else % for plot development
-    fn = 'flux_02388.mat';
+    fn = 'flux_03300.mat';
     pth = ['/Users/PM5/Documents/tools_output/energy_out/', ...
         'Cdia2005/flux_lp71/']; % _raw or _lp71
 end
@@ -54,10 +52,10 @@ for tt = 1:ntt % MOVIE loop start (or just make single plot)
     [p2,k2,e2,i2,sw,info] = Z_make_derived(p2,k2,sw,info);
     
     if do_flux
-        Z_flux_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fn,info);
+        Z_flux_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fnt,info);
         odir_name = 'a_flux_movie';
     else
-        Z_res_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fn,info);
+        Z_res_plot(G,p2,k2,e2,i2,sw,do_lp,Tdir,fnt,info);
         odir_name = 'a_res_movie';
     end
     

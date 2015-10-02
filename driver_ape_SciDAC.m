@@ -1,4 +1,4 @@
-function APE_driver(calc_name)
+function driver_APE_SciDAC(calc_name)
 %% Driver for calculating APE of arbitrary runs (for SciDAC).
 %
 % Calculates the exact APE (but neglecting compressibility).

@@ -1,6 +1,4 @@
-%% flux_test.m  6/12/2014  Parker MacCready
-%
-% does area integrations of the vertically-integrated flux terms
+% Does area integrations of the vertically-integrated flux terms
 % calculated by flux.m (via flux_driver.m)
 
 clear; addpath('../alpha/'); Tdir = toolstart;

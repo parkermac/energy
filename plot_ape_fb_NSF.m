@@ -1,10 +1,4 @@
-% APE_test.m  6/12/2014  Parker MacCready
-%
-% code to test different methods to calculate APE per unit area
-%
-% Added lines to make apev positive definite.  There were a few very small
-% negative points in the test case (min was -1.8e-9 compared to a median of
-% +6 and a mean of +77 in apev).  This could be due to roundoff error.
+% Makes a plot of Ape and Fb for a proposal.
 
 % set up the environment
 clear; addpath('../alpha/'); Tdir = toolstart;

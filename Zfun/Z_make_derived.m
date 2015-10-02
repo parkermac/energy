@@ -38,6 +38,7 @@ i2.pdt = p2.pdt_full - sw.pdt;
 i2.edt = i2.kdt + i2.pdt;
 i2.bern = e2.bern - sw.bern;
 i2.diss = e2.diss - sw.diss;
+i2.mix = p2.diss;
 i2.background = e2.background;
 i2.err = e2.err - sw.err;
 i2.wind_work = k2.wind_work;

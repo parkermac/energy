@@ -81,7 +81,7 @@ rho_avg = den1 + offset;
 rho00 = rho_avg.*(1 + alpha.*temp - beta.*salt);
 [D_avg] = Z_flat(eta_avg,rho_avg,rho_avg,z_avg,z_w_avg,H);
 zz_avg = D_avg.Z - D_avg.Zf;
-rr_avg = D_avg.R - D_avg.Rf;
+rr_avg = D_avg.R - D_avg.Rf; % Not used?
 clear salt temp
 
 % form vertically-integrated PE terms
@@ -168,7 +168,8 @@ p2.rate_check = (ape2 - ape1)/DT;
 %
 dapedt_uno = squeeze(sum((g*zz_avg.*rho00 - F_avg).*(DZ2 - DZ1)/DT));
 
-% this is for the term associated with rate of change of the rho_flat.
+% this is for the term associated with rate of change of rho_flat.
+% NOTE: this seems wrong - why am I calculating it using (rho2-rho1)??
 fld = (rho2 - rho1)/DT;
 [D_dot] = Z_flat(eta_avg,rho_avg,fld,z_avg,z_w_avg,H);
 F_dot = g*(D_dot.intFf - D_dot.intFfzf);

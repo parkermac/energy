@@ -1,5 +1,3 @@
-% compressibility_test.m  5/4/2015  Parker MacCready
-%
 % Code to test the effect of compressibility in the calculation of APE.
 
 % set up the environment

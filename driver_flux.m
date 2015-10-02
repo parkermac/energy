@@ -1,5 +1,3 @@
-%% flux_driver.m  5/1/2015  Parker MacCready
-%
 % Driver for 3D and SW energy budget. Saves one 2D (vertically integrated)
 % snapshot of energy terms, every hour. We do time averaging later.
 %
