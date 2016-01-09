@@ -71,7 +71,7 @@ for nn = nn_vec
         if sum(strcmp(varname,{'ape','ape_up','ape_down'}))
             mask = p2.(varname) <= 0;
             p2.(varname)(mask) = 1e-10;
-            if 0
+            if 1
                 isneg = nansum(p2.(varname)(:) < 0);
                 if isneg > 0
                     disp(['nn=',num2str(nn),' has ',num2str(isneg),' negative points']);

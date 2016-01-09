@@ -50,7 +50,7 @@ dd1 = interp1(Z,DD1,z);
 dz = diff(z); dz = [dz(1), dz];
 
 %% get values over a single range, for plotting
-zdeep = -deltaz - 50; zshallow = zdeep + deltaz;
+zdeep = -deltaz - 6; zshallow = zdeep + deltaz;
 
 n0 = find(z>=zdeep); n0 = n0(1);
 n1 = find(z>=zshallow); n1 = n1(1);
@@ -112,8 +112,8 @@ text(aa(2) - .05*dx, aa(3) + .1*dy, ...
 dzd = 50;
 zdeep_vec = [-2950:dzd:-deltaz-10];
 zshallow_vec = zdeep_vec + deltaz;
-ape_vec = nan*zdeep_vec;
-ape1_vec = ape_vec;
+ape_vec = nan*zdeep_vec; % compressible
+ape1_vec = ape_vec; % incompressible
 
 for nn = 1:length(zdeep_vec)
 
@@ -145,7 +145,7 @@ end
 %% plotting, part 2
 
 subplot(133)
-plot(ape_vec,zdeep_vec,'-r',ape1_vec,zdeep_vec,'-b','linewidth',lw)
+plot(ape_vec,zshallow_vec,'-r',ape1_vec,zshallow_vec,'-b','linewidth',lw)
 xlabel(['APE_{V} (J m^{-3}) for ',num2str(deltaz),' m Displacement']);
 ylabel('Starting Z (m)');
 ape_a = sum(dzd*ape_vec);

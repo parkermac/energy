@@ -8,7 +8,7 @@ addpath('./Zfun');
 odir_top = [Tdir.output,'energy_out/'];
 
 % set indices of times to average around
-if 0
+if 1
     nn_center_vec = 1836;
 else
     % for Cdia2005 we have 1:8760

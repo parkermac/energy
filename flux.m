@@ -9,11 +9,10 @@ function [p2,k2,info] = flux(dir0,nn,H)
 %   the density referenced to surface pressure for all APE calculations
 %
 % * calculates the exact APE terms from
-%   Scotti & White (2014).  This requires us to specify "island"
-%   inside the code.
+%   Scotti & White (2014).
 %
 % * uses hdiff instead of xdiff + ydiff for the tracer advection, which
-%   leads to nearly exact APE balance (see dia_DEBUG.m)
+%   leads to nearly exact APE balance.
 %
 % * assumes eta = 0 for most of the terms in the internal APE budget.
 
