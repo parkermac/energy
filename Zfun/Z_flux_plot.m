@@ -9,13 +9,13 @@ cax = scl*[-1 1];
 
 
 sw_list = {'kdt','pdt','bern','diss'};
-sw_name_list = {'SW dKE/dt','SW dAPE/dt','SW Bernoulli','SW Dissipation'};
+sw_name_list = {'(a) SW dKE/dt','(b) SW dAPE/dt','(c) SW Bernoulli','(d) SW Dissipation'};
 i2_list = {'kdt','pdt','bern','diss','background'};
-i2_name_list = {'dKE^{\prime}/dt','dAPE^{\prime}/dt','Bernoulli^{\prime}', ...
-    'Diss^{\prime} + Mixing','Background'};
+i2_name_list = {'(e) dKE^{\prime}/dt','(f) dAPE^{\prime}/dt','(g) Bernoulli^{\prime}', ...
+    '(h) Diss^{\prime} + Mixing','(i) Background'};
 
 NR = 2;
-NC = 6;
+NC = 5;
 
 for ii = 1:length(sw_list)
     fld_name = sw_list{ii};
@@ -43,6 +43,8 @@ for ii = 1:length(i2_list)
         ttext = strrep(fn,'.mat','');
         ttext = strrep(ttext,'flux_0','');
         text(xt,yt,[tag,' ',ttext], ...
+            'horizontalalignment','r');
+        text(xt,yt-.5,datestr(info.td_avg,'dd-mmm-YYYY'), ...
             'horizontalalignment','r');
     end
     if ii == 5; colorbar('south'); end;

@@ -1,4 +1,5 @@
 function driver_APE_SciDAC(calc_name)
+%calc_name = 'lo_lp_mac';
 %% Driver for calculating APE of arbitrary runs (for SciDAC).
 %
 % Calculates the exact APE (but neglecting compressibility).
@@ -7,8 +8,16 @@ function driver_APE_SciDAC(calc_name)
 addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-% get info for processing
+%% get info for processing
 switch calc_name
+    case 'lo_lp_mac' % LiveOcean low-passed, test on mac
+        basename = 'cascadia1_base_lo1';
+        nn_vec = datenum(2015,9,1):datenum(2015,9,30); % 
+        dir00 = '/Users/PM5/Documents/LiveOcean_roms/output/';
+    case 'lo_lp_fjo' % LiveOcean low-passed
+        basename = 'cascadia1_base_lo1';
+        nn_vec = datenum(2013,1,2):datenum(2015,12,31); % 
+        dir00 = '/pmr1/parker/LiveOcean_roms/output/';
     case 'mac0' % single time, for testing
         basename = 'D2005_his';
         nn_vec = 1836; %
@@ -40,7 +49,7 @@ switch calc_name
 end
 dir0 = [dir00,basename,'/'];
 
-% create top level output directory, if needed
+%% create top level output directory, if needed
 odir_top = [Tdir.output,'APE_out/'];
 if ~exist(odir_top,'dir'); mkdir(odir_top); end;
 
@@ -51,8 +60,15 @@ mkdir(odir);
 disp(' '); disp(['APE: Saving results to ',odir]);
 
 %% Initializing: get island mask and hypsometry
-ns = num2str(nn_vec(1)); ns = ['0000',ns]; ns = ns(end-3:end);
-fn = [dir0,'ocean_his_',ns,'.nc'];
+
+switch calc_name
+    case {'lo_lp_mac', 'lo_lp_fjo'}
+        nnn = nn_vec(1);
+        fn = [dir0,'f',datestr(nnn,'yyyy.mm.dd'),'/low_passed.nc'];
+    otherwise
+        ns = num2str(nn_vec(1)); ns = ['0000',ns]; ns = ns(end-3:end);
+        fn = [dir0,'ocean_his_',ns,'.nc'];
+end
 [G,S,T] = Z_get_basic_info(fn);
 DA.initial = G.DX .* G.DY;
 
@@ -96,14 +112,21 @@ ape_ser.td = nan(length(nn_vec),1);
 %% time loop
 for nn = 1:length(nn_vec);
     tic
-    nnn = nn_vec(nn);
-    ns = num2str(nnn); ns = ['0000',ns]; ns = ns(end-3:end);
-    fn = [dir0,'ocean_his_',ns,'.nc'];
+    
+    switch calc_name
+        case {'lo_lp_mac', 'lo_lp_fjo'}
+            nnn = nn_vec(nn);
+            fn = [dir0,'f',datestr(nnn,'yyyy.mm.dd'),'/low_passed.nc'];
+        otherwise
+            nnn = nn_vec(nn);
+            ns = num2str(nnn); ns = ['0000',ns]; ns = ns(end-3:end);
+            fn = [dir0,'ocean_his_',ns,'.nc'];
+    end
     
     [T] = Z_get_time_info(fn);
     ape_ser.td(nn) = T.time_datenum;
     
-    [G, apea, apea_up, apea_down, zz, rr] = Z_ape(fn);
+    [apea, apea_up, apea_down] = Z_ape(fn,G,S,H);
     
     for ii = 1:length(island_tag_list)
         island_tag = island_tag_list{ii};

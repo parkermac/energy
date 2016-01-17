@@ -41,6 +41,13 @@ DD = squeeze(den(:,nr,nc));
 DD1 = squeeze(den1(:,nr,nc));
 Z = squeeze(z_avg(:,nr,nc));
 
+% add a surface point
+SS = [SS; SS(end)];
+TT = [TT; TT(end)];
+DD = [DD; DD(end)];
+DD1 = [DD1; DD1(end)];
+Z = [Z; 0];
+
 % interpolate to get more points
 z = linspace(Z(1),Z(end),1000);
 ss = interp1(Z,SS,z);
@@ -50,7 +57,7 @@ dd1 = interp1(Z,DD1,z);
 dz = diff(z); dz = [dz(1), dz];
 
 %% get values over a single range, for plotting
-zdeep = -deltaz - 6; zshallow = zdeep + deltaz;
+zdeep = -deltaz - 0; zshallow = zdeep + deltaz;
 
 n0 = find(z>=zdeep); n0 = n0(1);
 n1 = find(z>=zshallow); n1 = n1(1);
@@ -79,9 +86,7 @@ lw = 3;
 
 figure
 Z_fig(16);
-set(gcf,'position',[10 10 2000 1000])
-set(gcf,'PaperPositionMode','auto');
-
+set(gcf,'position',[100 100 1500 600])
 
 subplot(131)
 plot(dd,z,'-r',dd1,z,'-b','linewidth',lw);
@@ -89,13 +94,17 @@ hold on
 plot(dpr,zr,'-r',dp1r,zr,'-b','linewidth',lw);
 xlabel('Density Anomaly (kg m^{-3})');
 ylabel('Z (m)');
-title('Full Water Column')
+[xt, yt] = Z_lab('ul');
+text(xt,yt,'(a)');
+
 
 subplot(132)
 plot(Dd,zr,'-r',Dd1,zr,'-b','linewidth',lw)
 xlabel('\Delta Density Anomaly (kg m^{-3})');
 ylabel('Z (m)');
-title([num2str(round(zr(1))),' m to ',num2str(round(zr(end))),' m']);
+[xt, yt] = Z_lab('ul');
+text(xt,yt,'(b)')
+
 
 aa = axis;
 dx = aa(2) - aa(1);
@@ -110,7 +119,7 @@ text(aa(2) - .05*dx, aa(3) + .1*dy, ...
 %% get values over a series of ranges
 
 dzd = 50;
-zdeep_vec = [-2950:dzd:-deltaz-10];
+zdeep_vec = [-2950:dzd:-deltaz];
 zshallow_vec = zdeep_vec + deltaz;
 ape_vec = nan*zdeep_vec; % compressible
 ape1_vec = ape_vec; % incompressible
@@ -164,6 +173,25 @@ text(aa(2) - .05*dx, aa(3) + .15*dy, ...
     ['Error = ',num2str(100*(ape1_a/ape_a)-100),'%'], ...
     'horizontalalignment','r','color','k');
 
+[xt, yt] = Z_lab('ul');
+text(xt,yt,'(c)')
+
+%% Printing
+
+% This works well (raster)
+fig = gcf;
+fig.PaperPositionMode = 'auto';
+print(fig,[Tdir.output,'/energy_out/test_ape_compressibility'],'-dpng','-r0')
+
+% This works nicely when viewed with Acrobat, but gives me trouble with
+% missing fonts when opened in Illustrator.
+%
+% set(gcf,'Units','inches');
+% screenposition = get(gcf,'Position');
+% set(gcf,...
+%     'PaperPosition',[0 0 screenposition(3:4)],...
+%     'PaperSize',[screenposition(3:4)]);
+% print(gcf,[Tdir.output,'/energy_out/test_ape_compressibility'],'-dpdf','-r0')
 
 
 
