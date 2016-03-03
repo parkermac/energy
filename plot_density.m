@@ -13,31 +13,56 @@ island = Z_island(G);
 
 % constants
 g = 9.81;
-rho0 = 1023.7; % set in the ROMS parameters
 offset = 1000; % to add to the density anomaly
 
 % space info
 eta = nc_varget(fn,'zeta');
-[z,z_w] = Z_s2z(G.h,eta,S);
-DZ = diff(z_w);
+[zr,zw] = Z_s2z(G.h,0*eta,S);
+DZ = diff(zw);
 
-% density
 salt = nc_varget(fn,'salt');
 temp = nc_varget(fn,'temp');
-[den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z);
-rho = den1 + offset;
 
-% flattened state
-[D,Zf,Rf] = Z_flat_fast(rho,z,z_w,H);
+[~,den1,~,~] = Z_roms_eos_vec(salt,temp,zr);
+rho = den1 + offset; % use potential density
+
+[D] = Z_flat(rho,rho,zr,zw,H);
 
 zz = D.Z - D.Zf;
-rr = D.R - D.Rf;
 
-% divide the APE into up and down parts
-zz_up = zz;
-zz_down = zz;
-zz_up(zz < 0) = 0;
-zz_down(zz >= 0) = 0;
+% create exact APE (neglecting compressibility)
+F = g*(D.intRf - D.intRfzf);
+apev = g*zz.*rho - F;
+apev(apev < 0) = 0;
+apea = squeeze(sum(apev.*DZ)); % [J m-2]
+
+% % constants
+% g = 9.81;
+% rho0 = 1023.7; % set in the ROMS parameters
+% offset = 1000; % to add to the density anomaly
+% 
+% % space info
+% eta = nc_varget(fn,'zeta');
+% [z,z_w] = Z_s2z(G.h,eta,S);
+% DZ = diff(z_w);
+% 
+% % density
+% salt = nc_varget(fn,'salt');
+% temp = nc_varget(fn,'temp');
+% [den,den1,alpha,beta] = Z_roms_eos_vec(salt,temp,z);
+% rho = den1 + offset;
+% 
+% % flattened state
+% [D,Zf,Rf] = Z_flat_fast(rho,z,z_w,H);
+% 
+% zz = D.Z - D.Zf;
+% rr = D.R - D.Rf;
+% 
+% % divide the APE into up and down parts
+% zz_up = zz;
+% zz_down = zz;
+% zz_up(zz < 0) = 0;
+% zz_down(zz >= 0) = 0;
 
 %% plotting
 close all
@@ -65,7 +90,7 @@ caxis(sig_lims);
 colormap jet
 %colorbar('south')
 axis([x_lims, z_lims]);
-title('\sigma_{0} (kg m^{-3})');
+title('(a) \sigma_{0} (kg m^{-3})');
 xlabel('Zonal Distance (km)');
 ylabel('Z (m)');
 
@@ -77,14 +102,14 @@ colormap jet
 %colorbar('south')
 set(gca,'YTickLabel',[])
 axis([x_lims, z_lims]);
-title('Flattened \sigma_{0} (kg m^{-3})');
+title('(b) Flattened \sigma_{0} (kg m^{-3})');
 xlabel('Zonal Distance (km)');
 
 subplot(133)
-lh = plot(D.R(:) - 1000,D.Z(:),'.c',Rf - 1000,Zf,'.b','markersize',1);
+lh = plot(D.R(:) - 1000,D.Z(:),'.c',D.Rf(:) - 1000,D.Z(:),'.b','markersize',1);
 set(gca,'YTickLabel',[])
 axis([sig_lims, z_lims]);
-title('Density Profiles')
+title('(c) Density Profiles')
 xlabel('\sigma_{0} (kg m^{-3})');
 [xt,yt] = Z_lab('ll');
 text(xt,yt + 30,'All Points in Volume','color','c')

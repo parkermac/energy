@@ -19,8 +19,9 @@ close all
 figure
 Z_fig(18)
 set(gcf,'position',[10 10 1200 800]);
-cax = [0 300];
+cax = [0 3000];
 island_tag_list = {'full','shelf','salish'};
+lab_list = {'(a)','(b)','(c)'};
 for ii = 1:length(island_tag_list)
     island_tag = island_tag_list{ii};
     island = island0;
@@ -44,14 +45,28 @@ for ii = 1:length(island_tag_list)
     hh = G.h;
     hh(island) = NaN;
     subplot(1,3,ii)
-    colormap jet
+    cm = colormap('parula');
+    cm = flipud(cm);
+    colormap(cm)
     Z_pcolorcen(G.lon_rho,G.lat_rho,hh);
     caxis(cax);
     shading flat
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
-    title(island_tag)
+    title([lab_list{ii},' ',island_tag])
+    xlabel('Longitude (deg)')
+    if ii == 1
+        ylabel('Latitide (deg)')
+        [xt,yt] = Z_lab('lr');
+        text(xt,yt,'Contour at 200 m','horizontalalignment','right')
+    end
+    
+    if ii == 3
+        colorbar('south');
+        text(-126,44,'Bottom Depth (m)')
+    end
+        
 end
 
 %% Printing
