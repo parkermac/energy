@@ -3,7 +3,10 @@
 % set up the environment
 clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
-fn = '/Users/PM5/Documents/roms/output/Cdia2005_4620/ocean_his_4620.nc';
+
+[basename,nn_vec,dir0] = Z_runspec_raw;
+ns = num2str(nn_vec(1)); ns = ['0000',ns]; ns = ns(end-3:end);
+fn = [dir0.his,'ocean_his_',ns,'.nc'];
 
 %% call the function
 [G,S,T] = Z_get_basic_info(fn);
@@ -88,7 +91,6 @@ for ii = 1:length(lat_list)
 end
 
 %% sections
-
 
 for ii = 1:length(lat_list)
     lat = lat_list(ii);

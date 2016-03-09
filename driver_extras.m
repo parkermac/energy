@@ -18,10 +18,11 @@ if ~exist(odir_top,'dir'); mkdir(odir_top); end;
 % get info for processing
 [basename,nn_vec,dir0] = Z_runspec_raw;
 
-% create EMPTY result directory
+% create EMPTY result directory (but don't geet rid of the flux results)
 odir_base = [odir_top,basename,'/'];
-if exist(odir_base,'dir'); rmdir(odir_base,'s'); end;
-odir = [odir_top,basename,'/extras_raw/']; mkdir(odir);
+if ~exist(odir_base,'dir'); mkdir(odir_base); end;
+odir = [odir_top,basename,'/extras_raw/'];
+if exist(odir,'dir'); rmdir(odir,'s'); end; mkdir(odir);
 disp(' '); disp(['extras: Saving results to ',odir]);
 
 %% get island mask and hypsometry

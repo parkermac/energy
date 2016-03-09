@@ -4,7 +4,7 @@
 clear
 addpath('../alpha/'); Tdir = toolstart;
 
-island_tag = 'shelf'; % salish, shelf, abyss, full
+island_tag = 'salish'; % salish, shelf, abyss, full
 dlim = [0 365]; % full year is [0 365];
 rho0 = 1023.7; % set in the ROMS parameters
 
@@ -24,7 +24,7 @@ Z_fig(14);
 set(gcf,'position',[200 50 1400 900]);
 set(gcf,'PaperPositionMode','auto');
 
-nfilt = 30; % filter length in days
+nfilt = 5; % filter length in days
 
 lw = 3; % linewidth
 
@@ -45,21 +45,37 @@ if 0
     grid on
         
 else
-    subplot(311)
-    plot(day,Z_jfilt(P2.pdt',nfilt)/info.mass,'--b', ...
-        day,Z_jfilt(P2.adv',nfilt)/info.mass,'-r', ...
-        day,Z_jfilt(P2.diss',nfilt)/info.mass,'-m', ...
-        day,Z_jfilt(P2.dpe0dt',nfilt)/info.mass,'-g', ...
-        day,Z_jfilt(P2.pdt' - P2.rate_check',nfilt)/info.mass,'-k', ...
-        'linewidth',lw)
+    subplot(312)
+    switch island_tag
+        case 'shelf'
+            plot(day,Z_jfilt(P2.pdt',nfilt)/info.mass,'--b', ...
+                day,Z_jfilt(P2.adv',nfilt)/info.mass,'-r', ...
+                day,Z_jfilt(EX2.wind_work',nfilt)/info.mass,':r', ...
+                day,Z_jfilt(P2.diss',nfilt)/info.mass,'-m', ...
+                day,Z_jfilt(P2.dpe0dt',nfilt)/info.mass,'-g', ...
+                day,Z_jfilt(P2.pdt' - P2.rate_check',nfilt)/info.mass,'-k', ...
+                'linewidth',lw)
+            legend('dAPE/dt','Adv + Conv','Wind Work','Mixing','Background','Error',0)
+        case 'salish'
+            plot(day,Z_jfilt((P2.pdt-P2.dpe0dt)',nfilt)/info.mass,'--b', ...
+                day,Z_jfilt(P2.adv',nfilt)/info.mass,'-r', ...
+                day,Z_jfilt(P2.diss',nfilt)/info.mass,'-m', ...
+                day,Z_jfilt(P2.pdt' - P2.rate_check',nfilt)/info.mass,'-k', ...
+                'linewidth',lw)
+            legend('dAPE/dt-Background','Adv + Conv','Mixing','Error',0)
+    end
     title(['(a) APE^{\prime} Rates [W kg^{-1}]  ::  ',upper(island_tag),' (',num2str(nfilt),' day filter)'])
-    legend('dAPE/dt','Adv + Conv','Mixing','Background','Error',0)
     set(gca,'xlim',dlim);
     grid on
     
 end
 
 %% Plot Environmental terms
+
+% Load TEF terms
+
+TEF = load([Tdir.output, ...
+    'energy_out/Cdia2005_TEF/Cdia2005_his_his_EH1_SimpleSection.mat']);
 
 % mooring fields in structure M
 
@@ -79,7 +95,7 @@ icr = find(strcmp(V.rname,lower(rivername)));
 Vmask = V.Qr_year == yn;
 qcr = V.Qr_flow(Vmask,icr);
 
-subplot(312)
+subplot(313)
 hold on
 if 1
     wind = Z_8d(M.svstr')';
@@ -109,10 +125,9 @@ text(xt,yt,[rivername,' River [',num2str(rivscale),' m^{3} s^{-1}]'],'color','b'
     'fontweight','bold','fontsize',18, ...
     'horizontalalignment','r')
 
-
 %% Reservoirs
 
-subplot(313)
+subplot(311)
 % note the APE terms in P2 do not include the SW part
 plot(day,P2.ape/info.mass,'-r', ...
     day,P2.ape_up/info.mass,'--r', ...
@@ -138,26 +153,63 @@ end
 
 %% make a second figure
 
-w = wind(36:24:8760 - 36);
-
-figure;
-plot(w,Z_jfilt(P2.adv',nfilt)/info.mass,'*r');
-grid on
-xlabel('8-day Filtered Meridional Wind Stress [Pa]')
-ylabel('APE^{\prime} Rate: Adv+Conv [W kg^{-1}]')
-axis square
-aa = axis;
-hold on
-plot(aa(1:2),[0,0],'-k')
-plot([0,0],aa(3:4),'-k')
-axis(aa)
-
-%% Printing
-
-if 1
+if strcmp(island_tag,'shelf')
+    
+    w = wind(36:24:8760 - 36);
+    mask_upwelling = w < 0;
+    mask_downwelling = w >= 0;
+    
+    figure;
+    plot(Z_jfilt(EX2.wind_work(mask_upwelling)',nfilt)/info.mass, ...
+        Z_jfilt(P2.adv(mask_upwelling)',nfilt)/info.mass,'*r');
+    hold on
+    plot(Z_jfilt(EX2.wind_work(mask_downwelling)',nfilt)/info.mass, ...
+        Z_jfilt(P2.adv(mask_downwelling)',nfilt)/info.mass,'*b');
+    grid on
+    xlabel('Wind Work on Geostrophic Flow [W kg^{-1}]')
+    ylabel('APE^{\prime} Rate: Adv+Conv [W kg^{-1}]')
+    axis(1e-7*[-.5 3 -.5 3]);
+    axis square
+    aa = axis;
+    hold on
+    plot(aa(1:2),[0,0],'-k')
+    plot([0,0],aa(3:4),'-k')
+    axis(aa)
+    
+    % Printing
+    
     set(gcf,'PaperPositionMode','auto');
     print('-dpng',[Tdir.output,['energy_out/adv_conv_vs_wind_',island_tag,'.png']]);
+    
 end
+
+if strcmp(island_tag,'salish')
+    
+    tef_qin = Z_jfilt(TEF.Qin,nfilt*24);
+    tef_day = TEF.tdQ;
+    
+    tef_qin = tef_qin(36:24:8760 - 36);
+    tef_day = tef_day(36:24:8760 - 36);
+        
+    figure;
+    plot(tef_qin, ...
+        Z_jfilt(P2.adv',nfilt)/info.mass,'*r');
+    grid on
+    xlabel('Qin [m^{3} s^{-1}]')
+    ylabel('APE^{\prime} Rate: Adv+Conv [W kg^{-1}]')
+    aa = axis;
+    hold on
+    plot(aa(1:2),[0,0],'-k')
+    plot([0,0],aa(3:4),'-k')
+    axis(aa)
+    
+    % Printing
+    
+    set(gcf,'PaperPositionMode','auto');
+    print('-dpng',[Tdir.output,['energy_out/adv_conv_vs_qin_',island_tag,'.png']]);
+    
+end
+
 
 
 

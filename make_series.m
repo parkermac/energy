@@ -10,14 +10,16 @@ if 0
     nn_vec = 1:8760;
 else
     pth = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/flux_lp71/';
+    pth_ex = '/Users/PM5/Documents/tools_output/energy_out/Cdia2005/extras_lp71/';
     nn_vec = 36:24:8760-36;
 end
 
-island_tag = 'full'; % salish, shelf, abyss, full
+island_tag = 'salish'; % salish, shelf, abyss, full
 
 load([pth,'G.mat']); % has island
 
 td_vec = NaN * nn_vec;
+td_vec_ex = NaN * nn_vec;
 
 tt = 0; % a counter
 for nn = nn_vec
@@ -26,9 +28,12 @@ for nn = nn_vec
     
     ncpad = ['0000',num2str(nn)]; ncpad = ncpad(end-4:end);
     infile = ['flux_',ncpad,'.mat'];
+    infile_ex = ['extras_',ncpad,'.mat'];
     if(mod(nn,10)==0); disp(['Working on ',infile]); end;
     load([pth,infile]);
     td_vec(tt) = info.td_avg;
+    load([pth_ex,infile_ex]);
+    td_vec_ex(tt) = info.td_avg;
     [p2,k2,e2,i2,sw,info] = Z_make_derived(p2,k2,sw,info);
     
     if tt==1
@@ -100,13 +105,18 @@ for nn = nn_vec
         varname = fnm{ii};
         SW.(varname)(tt) = squeeze(nansum(sw.(varname)(:).*DA(:)));
     end
-    
+    fnm = fieldnames(ex2);
+    for ii = 1:length(fnm)
+        varname = fnm{ii};
+        EX2.(varname)(tt) = squeeze(nansum(ex2.(varname)(:).*DA(:)));
+    end    
 end
 
 %% save results
 info.td_vec = td_vec;
+info.td_vec_ex = td_vec_ex;
 info.area = nansum(DA(:));
 info.volume = nansum(DA(:).*G.h(:));
 
-save([pth,'series_',island_tag,'.mat'],'P2','K2','E2','I2','SW','info');
+save([pth,'series_',island_tag,'.mat'],'P2','K2','E2','I2','SW','EX2','info');
 
