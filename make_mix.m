@@ -31,7 +31,7 @@ island = Z_island(G);
 if win_len == 71; wt = Z_godin_shape;
 else; wt = hanning(win_len); wt = wt/sum(wt); end;
 
-for cc = nn_vec; % start of "day" loop
+for cc = nn_center_vec; % start of "day" loop
     
     tic
     
