@@ -6,10 +6,10 @@ clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
 % set index of times to average around
-nn_center_vec = 1836;
+nn_center_vec = 4620;
 
 % set size of averaging window (71)
-win_len = 1;
+win_len = 71;
 
 [basename,nn_vec,dir0] = Z_runspec_raw; % just to get dir0
 nn = nn_center_vec(1);
@@ -103,6 +103,6 @@ mix3 = p3.vdiff + p3.hdiff;
 
 %% save output for later plotting
 
-save([odir,'mix_out.mat'],'mix2', 'mix3', 'den1');
+save([odir,'mix_out_',num2str(nn_center_vec),'_',num2str(win_len),'.mat'],'mix2', 'mix3', 'den1');
 
 

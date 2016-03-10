@@ -44,7 +44,6 @@ rho = den1 + offset; % use potential density
 [D] = Z_flat(rho,rho,zr,zw,H);
 zz = D.Z - D.Zf;
 
-
 % form vertically-integrated PE terms
 for ii = 1:length(ts_list)
     varname = ts_list{ii};

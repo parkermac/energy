@@ -15,7 +15,7 @@ fn_avg = [dir0.avg,'ocean_avg_',ns,'.nc'];
 
 odir = [Tdir.output,'energy_out/'];
 
-load([odir,'mix_out.mat']);
+load([odir,'mix_out_1836_1.mat']);
 
 %% Get hypsometry (only needed for the island mask)
 [G,S,T] = Z_get_basic_info(fn_avg);
