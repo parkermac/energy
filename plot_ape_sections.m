@@ -62,7 +62,7 @@ set(gcf,'position',[10 10 1300 1000]);
 
 %% map
 
-lat_list = [49.2, 47, 44];
+lat_list = [49.2, 47, 44.3];
 
 ax_mat = [-124.2 -122.8 -400 0; -125.5 -124 -400 0; -125.5 -124 -400 0];
 
@@ -111,7 +111,7 @@ for ii = 1:length(lat_list)
     pcolor(Lonf,Zf,log10(Apevf))
     caxis([0 4])
     shading interp
-    colorbar('east')
+    colorbar('eastoutside')
     
     hold on
     contour(Lonf, Zf, Sigf,[20:.5:30],'-k')

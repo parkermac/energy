@@ -6,14 +6,14 @@ function [basename,nn_vec,dir0] = Z_runspec_raw
 % the intention is that you just change "calc_name" here when moving to
 % different computers
 
-calc_name = 'fjo';
+calc_name = 'mac0';
 
 switch calc_name
     case 'mac0' % single time, for testing
         basename = 'D2005';
         % 4620 for 12-Jul-2005 11:30:00
         % 1836 for 18-Mar-2005 11:30:00
-        nn_vec = 1836; 
+        nn_vec = 4800; 
         dir1 = '/Users/PM5/Documents/roms/output/';
     case 'mac1' % a longer series, suitable for averaging
         basename = 'D2005';

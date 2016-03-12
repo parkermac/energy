@@ -2,26 +2,31 @@
 clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
-% set index of times to average around
-nn_center_vec = 1836;
-
-% set size of averaging window (71)
-win_len = 71;
 
 [basename,nn_vec,dir0] = Z_runspec_raw; % just to get dir0
-nn = nn_center_vec(1);
+nn = 4800;
 ns = num2str(nn); ns = ['0000',ns]; ns = ns(end-3:end);
 fn_avg = [dir0.avg,'ocean_avg_',ns,'.nc'];
 
 odir = [Tdir.output,'energy_out/'];
 
-load([odir,'mix_out_1836_1.mat']);
+load([odir,'mix_out_',num2str(nn),'_71.mat']);
 
 %% Get hypsometry (only needed for the island mask)
 [G,S,T] = Z_get_basic_info(fn_avg);
 island = Z_island(G);
 [H] = Z_hyp(G,S,island);
 [zr,zw] = Z_s2z(G.h,0*G.h,S);
+
+mix3(H.island3) = NaN;
+
+zr(H.island3) = NaN;
+G.h(H.island) = NaN;
+for kk = 1:S.N+1
+    this_zw = zw(kk,:,:);
+    this_zw(H.island) = NaN;
+    zw(kk,:,:) = this_zw;
+end
 
 
 %% plotting
@@ -32,14 +37,14 @@ set(gcf,'position',[10 10 1300 1000]);
 
 %% map
 
-lat_list = [49.2, 47, 44];
+lat_list = [49.2, 47, 44.3];
 
-ax_mat = [-124.2 -122.8 -400 0; -125 -124 -200 0; -125 -124 -200 0];
+ax_mat = [-124 -123 -400 0.1; -125 -124 -100 0.1; -125 -124 -100 0.1];
 
 subplot(121);
 colormap jet
 Z_pcolorcen(G.lon_rho,G.lat_rho,1e3*mix2);
-caxis(5*[-1 1]);
+caxis(10*[-1 1]);
 shading flat
 colorbar('south')
 hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
@@ -81,9 +86,9 @@ if 1
         
         subplot(length(lat_list),2,2*ii)
         pcolor(Lonf,Zf,1e3*Mix3f)
-        caxis(5e-1*[-1 1])
+        caxis(1*[-1 1])
         shading interp
-        colorbar('east')
+        colorbar('eastoutside')
         
         hold on
         contour(Lonf, Zf, Sigf,[20:.5:30],'-k')
