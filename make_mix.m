@@ -6,7 +6,7 @@ clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
 
 % set index of times to average around
-nn_center_vec = 4620;
+nn_center_vec = 4812;
 
 % set size of averaging window (71)
 win_len = 71;

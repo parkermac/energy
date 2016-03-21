@@ -11,7 +11,7 @@ island_tag = 'salish'; % salish, shelf, abyss, full
 nfilt = 5; % filter length in days
 yh_line = 4800; % hour for a marker (like a line)
 yd_line = yh_line/24; % yearday for the same marker
-do_print = 0;
+do_print = 1;
 
 % set things that are unlikely to change
 dlim = [0 365]; % full year is [0 365];
@@ -62,6 +62,15 @@ wind(isnan(wind)) = 0;
 mask = wind > 0;
 M.windp = wind; M.windp(~mask) = 0;
 M.windm = wind; M.windm(mask) = 0;
+
+% and make an analogous term for zonal wind stress
+M.windx = Z_8d(M.sustr')';
+% note Z_8d must only be used with hourly data
+windx = M.windx;
+windx(isnan(windx)) = 0;
+mask = windx > 0;
+M.windxp = windx; M.windxp(~mask) = 0;
+M.windxm = windx; M.windxm(mask) = 0;
 
 %% Load rivers in structure R
 %
@@ -124,7 +133,7 @@ plot(TEF.tdQ,Z_jfilt(TEF.Qin/1000,24*nfilt),'-k','linewidth',3)
 xlim(dlim)
 ylim([0 300])
 [xt,yt] = Z_lab('ul');
-text(xt,yt,'(c) Juan de Fuca Total Exchange Flow [1000 m^{3} s^{-1}]', ...
+text(xt,yt,'(c) Juan de Fuca Total Exchange Flow Q_{IN} [1000 m^{3} s^{-1}]', ...
     'fontweight','bold','fontsize',fs)
 % add a line at a specific time
 aa = axis; hold on; plot(yd_line*[1 1],aa(3:4),'-k'); axis(aa);
@@ -182,6 +191,7 @@ text(xt,yt,['(b) APE^{\prime} Rates [10^{-6} W kg^{-1}]', ...
     ' ',num2str(nfilt),'-Day Filter'], ...
     'fontweight','bold','fontsize',fs)
 xlim(dlim)
+hold on; plot(dlim,[0 0],'-k');
 % add a line at a specific time
 aa = axis; hold on; plot(yd_line*[1 1],aa(3:4),'-k'); axis(aa);
 xlabel('Days')
@@ -194,13 +204,13 @@ end
 %% Corrolations
 
 figure;
-set(gcf,'position',[300 300 1400 600]);
+set(gcf,'position',[300 300 1500 500]);
 set(gcf,'PaperPositionMode','auto');
 
 subplot(1,3,[1 2])
 
 scl = 1e6;
-plot(day,scl*Z_jfilt(EX2.wind_work',nfilt)/info.mass,':b', ...
+plot(day,scl*Z_jfilt(EX2.wind_work',nfilt)/info.mass,'-c', ...
     day,scl*Z_jfilt(P2.adv',nfilt)/info.mass,'-b', ...
     'linewidth',lw)
 legend('Geostrophic Wind Work','Adv + Conv','location','northeast')
@@ -213,23 +223,31 @@ ylabel('[10^{-6} W kg^{-1}]')
 
 subplot(133)
 
-w = M.wind(36:24:8760 - 36);
+if strcmp(island_tag,'shelf')
+    w = M.wind(36:24:8760 - 36);
+elseif strcmp(island_tag,'salish')
+    w = M.windx(36:24:8760 - 36);
+end
 mask_upwelling = w < 0;
 mask_downwelling = w >= 0;
 
 scl = 1e6;
 lh1 = plot(scl*Z_jfilt(EX2.wind_work(mask_upwelling)',nfilt)/info.mass, ...
-    scl*Z_jfilt(P2.adv(mask_upwelling)',nfilt)/info.mass,'*b');
+    scl*Z_jfilt(P2.adv(mask_upwelling)',nfilt)/info.mass,'ob','markerfacecolor','b');
 hold on
 lh2 = plot(scl*Z_jfilt(EX2.wind_work(mask_downwelling)',nfilt)/info.mass, ...
-    scl*Z_jfilt(P2.adv(mask_downwelling)',nfilt)/info.mass,'*r');
+    scl*Z_jfilt(P2.adv(mask_downwelling)',nfilt)/info.mass,'or');
 lh3 = plot([0 .3],[0 .15],'-k');
 axis([-.05 .3 -.05 .15]);
 aa = axis;
 [xt,yt] = Z_lab('ul');
 text(xt,yt,'(b)','fontweight','bold','fontsize',fs)
 grid on
-legend([lh1;lh2;lh3],'Upwelling','Downwelling','1:2 Line','location','north')
+if strcmp(island_tag,'shelf')
+    legend([lh1;lh2;lh3],'Upwelling','Downwelling','1:2 Line','location','north')
+elseif strcmp(island_tag,'salish')
+    legend([lh1;lh2;lh3],'Easterly','Westerly','1:2 Line','location','north')
+end
 xlabel('Geostrophic Wind Work [10^{-6} W kg^{-1}]')
 ylabel('APE^{\prime} Rate: Adv+Conv [10^{-6} W kg^{-1}]')
 hold on
@@ -249,12 +267,12 @@ figure;
 set(gcf,'position',[300 300 1400 600]);
 set(gcf,'PaperPositionMode','auto');
 
-scl1 = 0.5;
-scl2 = 1e6;
-plot(day,scl1*Z_jfilt(SW.ke',nfilt)/info.mass,'r', ...
-    day,scl2*Z_jfilt(P2.hdiff' + P2.vdiff',nfilt)/info.mass,'-b', ...
-    'linewidth',lw)
-legend('1/2 SW KE [J kg^{-1}]','Mixing [10^{-6} W kg^{-1}]','location','northeast')
+scl = 1e6;
+[ax,lh1,lh2] = plotyy(day,Z_jfilt(SW.ke',nfilt)/info.mass, ...
+    day,scl*Z_jfilt(P2.hdiff' + P2.vdiff',nfilt)/info.mass);
+lh1.LineWidth = lw;
+lh2.LineWidth = lw;
+legend('KE^{SW} [J kg^{-1}]','Mixing [10^{-6} W kg^{-1}]','location','northeast')
 xlim(dlim)
 grid on
 xlabel('Days')
@@ -262,37 +280,40 @@ ylabel('')
 
 % Printing
 if do_print
-    print('-dpng',[Tdir.output,['energy_out/newcorr_',island_tag,'.png']]);
+    print('-dpng',[Tdir.output,['energy_out/Mix_and_KEsw_',island_tag,'.png']]);
 end
 
+%% More correlations
 
+figure;
+set(gcf,'position',[300 300 1400 600]);
+set(gcf,'PaperPositionMode','auto');
 
+nfilt1 = 30;
 
-%% extra
+tef_qin = Z_jfilt(TEF.Qin,nfilt1*24);
+tef_day = TEF.tdQ;
 
-% tef_qin = Z_jfilt(TEF.Qin,nfilt*24);
-% tef_day = TEF.tdQ;
-% 
-% tef_qin = tef_qin(36:24:8760 - 36);
-% tef_day = tef_day(36:24:8760 - 36);
-% 
-% figure;
-% plot(tef_qin, ...
-%     Z_jfilt(P2.adv',nfilt)/info.mass,'*r');
-% grid on
-% xlabel('Qin [m^{3} s^{-1}]')
-% ylabel('APE^{\prime} Rate: Adv+Conv [W kg^{-1}]')
-% aa = axis;
-% hold on
-% plot(aa(1:2),[0,0],'-k')
-% plot([0,0],aa(3:4),'-k')
-% axis(aa)
-% 
-% % Printing
-% set(gcf,'position',[50 50 600 600]);
-% set(gcf,'PaperPositionMode','auto');
-% print('-dpng',[Tdir.output,['energy_out/adv_conv_vs_qin_',island_tag,'.png']]);
-% 
+tef_qin = tef_qin(36:24:8760 - 36);
+tef_day = tef_day(36:24:8760 - 36);
+
+scl = 1e6;
+scl2 = 1e3;
+[ax,lh1,lh2] = plotyy(day,scl*Z_jfilt(P2.adv',nfilt1)/info.mass, ...
+    tef_day,-tef_qin/scl2);
+lh1.LineWidth = lw;
+lh2.LineWidth = lw;
+legend('Adv + Conv [10^{-6} W kg^{-1}]','-Q_{IN} [10^{3} m^{3} s^{-1}]','location','northeast')
+xlim(dlim)
+grid on
+xlabel('Days')
+ylabel('')
+
+% Printing
+if do_print
+    print('-dpng',[Tdir.output,['energy_out/AdvConv_and_Qin_',island_tag,'.png']]);
+end
+
 
 
 

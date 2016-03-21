@@ -11,7 +11,7 @@ if 0 % user selection
     [fn,pth] = uigetfile(pth0,'Select .mat file(s) to plot', ...
         'multiselect','on');
 else % for plot development
-    fn = 'flux_04620.mat';
+    fn = 'flux_04812.mat';
     pth = ['/Users/PM5/Documents/tools_output/energy_out/', ...
         'Cdia2005/flux_lp71/']; % _raw or _lp71
 end

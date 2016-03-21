@@ -117,7 +117,7 @@ end
 
 %% printing
 
-if 0
+if 1
     set(gcf,'PaperPositionMode','auto');
     print('-dpng',[Tdir.output,['energy_out/mix_sections.png']]);
 end
