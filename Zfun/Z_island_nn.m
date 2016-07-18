@@ -1,5 +1,7 @@
-function island = Z_island(G)
-% 6/12/2014 Parker MacCready
+function island = Z_island_nn(G, nn)
+% 6/22/2016 Parker MacCready
+%
+% like Z_island but with a variable masking region
 %
 % DEFINE MASKING ARRAY
 % island is a logical array, with:
@@ -8,7 +10,8 @@ function island = Z_island(G)
 
 island = ~G.mask_rho; 
 % mask out nudging regions
-nn = 8; % original is 8 (9 MAY make bad point go away)
+% ## get nn from the inputs ##
+%nn = 8; % original is 8 (9 MAY make bad point go away)
 %nn = 100; % sensitivity testing 6/22/2016
 island(1:nn,:) = 1;
 island(:,1:nn) = 1;

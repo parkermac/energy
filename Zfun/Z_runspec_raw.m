@@ -13,7 +13,7 @@ switch calc_name
         basename = 'D2005';
         % 4620 for 12-Jul-2005 11:30:00
         % 1836 for 18-Mar-2005 11:30:00
-        nn_vec = 4800; 
+        nn_vec = 4812; 
         dir1 = '/Users/PM5/Documents/roms/output/';
     case 'mac1' % a longer series, suitable for averaging
         basename = 'D2005';

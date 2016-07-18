@@ -4,7 +4,7 @@
 % set up the environment
 clear; addpath('../alpha/'); Tdir = toolstart;
 addpath('./Zfun');
-fn = '/Users/PM5/Documents/roms/output/D2005_avg/ocean_avg_1836.nc';
+fn = '/Users/PM5/Documents/roms/output/D2005_avg/ocean_avg_4812.nc';
 
 %% get info
 [G,S,T] = Z_get_basic_info(fn);
@@ -79,7 +79,7 @@ sigma_sect_full = [sigma_sect(1,:); sigma_sect; sigma_sect(end,:)];
 sigmaf_sect = squeeze(D.Rf(:,ny,:)) - 1000;
 sigmaf_sect_full = [sigmaf_sect(1,:); sigmaf_sect; sigmaf_sect(end,:)];
 
-sig_lims = [23, 27];
+sig_lims = [23, 27.5];
 x_lims = [40, 250];
 z_lims = [-500, 5];
 
@@ -106,7 +106,9 @@ title('(b) Flattened \sigma_{0} (kg m^{-3})');
 xlabel('Zonal Distance (km)');
 
 subplot(133)
-lh = plot(D.R(:) - 1000,D.Z(:),'.c',D.Rf(:) - 1000,D.Z(:),'.b','markersize',1);
+lh = plot(D.R(:) - 1000,D.Z(:),'.c',D.Rf(:) - 1000,D.Z(:),'ob', ...
+    'markersize',1);
+set(lh(2),'markersize',5);
 set(gca,'YTickLabel',[])
 axis([sig_lims, z_lims]);
 title('(c) Density Profiles')

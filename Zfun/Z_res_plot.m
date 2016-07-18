@@ -11,6 +11,8 @@ k2.ike(k2.ike<0) = nan;
 
 NR = 1; NC = 3;
 
+fs = 16;
+
 % make structures a and b, with fields and names, respectively
 %
 %a.ape = log10(p2.ape); b.ape = 'log_{10} iAPE (J m^{-2})';
@@ -29,7 +31,7 @@ for ii = 1:length(fnm)
     caxis([1 6]);
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
     if ii == length(fnm); colorbar('south'); end;
-    title(b.(varname))
+    title(b.(varname), 'fontsize', fs)
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
     if ii == 1

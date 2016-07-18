@@ -17,6 +17,8 @@ i2_name_list = {'(e) dKE^{\prime}/dt','(f) dAPE^{\prime}/dt','(g) Bernoulli^{\pr
 NR = 2;
 NC = 5;
 
+fs = 16;
+
 for ii = 1:length(sw_list)
     fld_name = sw_list{ii};
     fld_title = sw_name_list{ii};
@@ -25,7 +27,7 @@ for ii = 1:length(sw_list)
     Z_pcolorcen(G.lon_rho,G.lat_rho,fld);
     caxis(cax);
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
-    title([fld_title,' (W m^{-2})'])
+    title([fld_title,' (W m^{-2})'], 'fontsize',fs)
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
 end
@@ -49,7 +51,7 @@ for ii = 1:length(i2_list)
     end
     if ii == 5; colorbar('south'); end;
     hold on; contour(G.lon_rho,G.lat_rho,G.h,[200 200],'-k')
-    title([fld_title,' (W m^{-2})'])
+    title([fld_title,' (W m^{-2})'], 'fontsize',fs)
     Z_dar;
     Z_addcoast('combined',Tdir.coast);
 end

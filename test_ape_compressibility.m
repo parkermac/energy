@@ -6,7 +6,7 @@ addpath('./Zfun');
 
 % choose the file to work on
 basename = 'D2005';
-nsave = 1848; %
+nsave = 4812; %
 dir1 = '/Users/PM5/Documents/roms/output/';
 dir0 = [dir1,basename,'_avg/'];
 ns = num2str(nsave); ns = ['0000',ns]; ns = ns(end-3:end);

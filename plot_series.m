@@ -9,7 +9,7 @@ addpath('../alpha/'); Tdir = toolstart;
 % choices
 island_tag = 'salish'; % salish, shelf, abyss, full
 nfilt = 5; % filter length in days
-yh_line = 4800; % hour for a marker (like a line)
+yh_line = 4812; % hour for a marker (like a line)
 yd_line = yh_line/24; % yearday for the same marker
 do_print = 1;
 

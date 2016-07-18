@@ -90,6 +90,14 @@ for ii = 1:length(lat_list)
     text(ax_mat(ii,1)-.2,llat,lab_list(ii))
 end
 
+% add a mooring location
+lat_moor = 46.9997; lon_moor = -124.4919;
+plot(lon_moor,lat_moor,'pk','markerfacecolor','w','markersize',20)
+
+% add TEF section line
+plot([-124.7072 -124.7072],[48.386 48.5991],':k','linewidth',3)
+
+
 %% sections
 
 for ii = 1:length(lat_list)
@@ -114,7 +122,7 @@ for ii = 1:length(lat_list)
     colorbar('eastoutside')
     
     hold on
-    contour(Lonf, Zf, Sigf,[20:.5:30],'-k')
+    contour(Lonf, Zf, Sigf,[20:.5:37],'-k')
     
     plot(Lon,Zw(1,:),'-k','linewidth',3)
     
@@ -123,7 +131,9 @@ for ii = 1:length(lat_list)
     xlabel('Longitude (deg)')
     ylabel('Z (m)')
     if ii == 1
-        title('(b) log10 APE^{\prime}_{V} (J m^{-3})')
+        title('log10 APE^{\prime}_{V} (J m^{-3})')
+        [xt,yt] = Z_lab('ll');
+        text(xt,yt,'(b)','fontweight','bold','color','k')
     elseif ii == 2
         [xt,yt] = Z_lab('ll');
         text(xt,yt,'(c)','fontweight','bold','color','w')

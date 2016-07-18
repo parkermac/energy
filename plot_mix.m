@@ -4,7 +4,7 @@ addpath('./Zfun');
 
 
 [basename,nn_vec,dir0] = Z_runspec_raw; % just to get dir0
-nn = 4800;
+nn = 4812;
 ns = num2str(nn); ns = ['0000',ns]; ns = ns(end-3:end);
 fn_avg = [dir0.avg,'ocean_avg_',ns,'.nc'];
 

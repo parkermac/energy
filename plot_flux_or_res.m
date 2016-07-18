@@ -31,7 +31,7 @@ if iscell(fn); make_movie = 1; end
 if make_movie; ntt = size(fn,2); else ntt = 1; end;
 
 figure
-Z_fig(12);
+Z_fig(14);
 set(gcf,'position',[1 1 1500 1100]); % laptop version
 %set(gcf,'position',[10 10 2500 1300]);
 set(gcf,'PaperPositionMode','auto');
