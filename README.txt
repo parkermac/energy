@@ -1,8 +1,8 @@
 README for the energy code
 
-1/9/2016  Parker MacCready
+10/5/2016  Parker MacCready
 
-The code in this directory calculates reservoir and flux terms in the KE and APE budgets calculated from a ROMS simulation.  The equation development and numerical methods are described in detail in a draft manuscript (MacCready 2016).
+The code in this directory calculates reservoir and flux terms in the KE and APE budgets calculated from a ROMS simulation.  The equation development and numerical methods are described in detail in MacCready and Giddings (2016, JPO).
 
 What you need to run the code:
 
